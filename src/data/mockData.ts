@@ -1,199 +1,89 @@
-// Mock data for wind turbine monitoring system
-export interface SensorData {
-  id: string;
-  name: string;
-  value: number;
-  unit: string;
-  status: 'normal' | 'warning' | 'critical';
-  timestamp: string;
-}
+import { TurbineData, Alert } from '../types';
 
-export interface PowerData {
-  time: string;
-  power: number;
-  efficiency: number;
-}
+export const generateMockTurbineData = (): TurbineData => {
+  const now = new Date();
+  const baseWindSpeed = 8 + Math.random() * 12; // 8-20 m/s
+  const powerOutput = Math.min(3.0, Math.max(0, (baseWindSpeed - 3) * 0.3 + Math.random() * 0.5));
+  const rotorRpm = Math.min(30, Math.max(0, baseWindSpeed * 1.2 + Math.random() * 3));
+  
+  return {
+    timestamp: now.toISOString(),
+    powerOutput: Number(powerOutput.toFixed(2)),
+    windSpeed: Number(baseWindSpeed.toFixed(1)),
+    rotorRpm: Number(rotorRpm.toFixed(1)),
+    nacelle: {
+      yaw: 180 + Math.random() * 180, // 180-360 degrees
+      temperature: 60 + Math.random() * 20, // 60-80°C
+    },
+    blades: {
+      pitch: 2 + Math.random() * 8, // 2-10 degrees
+      vibration: 0.5 + Math.random() * 1.5, // 0.5-2.0 m/s²
+    },
+    noise: {
+      level: 35 + Math.random() * 15, // 35-50 dB
+      frequency: 100 + Math.random() * 50, // 100-150 Hz
+    },
+    weather: {
+      temperature: 10 + Math.random() * 20, // 10-30°C
+      humidity: 40 + Math.random() * 40, // 40-80%
+      pressure: 1000 + Math.random() * 30, // 1000-1030 hPa
+      windDirection: Math.random() * 360, // 0-360 degrees
+    },
+    maintenance: {
+      nextService: '2024-03-15',
+      operatingHours: 8742 + Math.floor(Math.random() * 100),
+      alerts: generateMockAlerts(),
+    },
+  };
+};
 
-export interface TemperatureData {
-  time: string;
-  gearbox: number;
-  generator: number;
-  bearing: number;
-}
+const generateMockAlerts = (): Alert[] => {
+  const alerts: Alert[] = [];
+  const alertTypes = ['warning', 'error', 'info'] as const;
+  const modules = ['noise', 'power', 'weather', 'maintenance'] as const;
+  
+  const possibleAlerts = [
+    { type: 'warning', message: 'Blade vibration approaching threshold', module: 'maintenance' },
+    { type: 'info', message: 'Scheduled maintenance due in 7 days', module: 'maintenance' },
+    { type: 'warning', message: 'Noise level elevated during peak hours', module: 'noise' },
+    { type: 'error', message: 'Power output below expected for current wind conditions', module: 'power' },
+    { type: 'info', message: 'Weather conditions optimal for operation', module: 'weather' },
+  ];
+  
+  // Randomly select 0-3 alerts
+  const numAlerts = Math.floor(Math.random() * 4);
+  for (let i = 0; i < numAlerts; i++) {
+    const alert = possibleAlerts[Math.floor(Math.random() * possibleAlerts.length)];
+    alerts.push({
+      id: `alert-${Date.now()}-${i}`,
+      type: alert.type,
+      message: alert.message,
+      module: alert.module,
+      timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(), // Random time in last hour
+    });
+  }
+  
+  return alerts;
+};
 
-export interface MaintenanceTask {
-  id: string;
-  component: string;
-  type: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  dueDate: string;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'overdue';
-  description: string;
-}
-
-export interface Notification {
-  id: string;
-  type: 'info' | 'warning' | 'error' | 'success';
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-}
-
-// Real-time sensor data
-export const sensorData: SensorData[] = [
-  {
-    id: '1',
-    name: 'Wind Speed',
-    value: 12.5,
-    unit: 'm/s',
-    status: 'normal',
-    timestamp: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Power Output',
-    value: 1.8,
-    unit: 'MW',
-    status: 'normal',
-    timestamp: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    name: 'Blade Pitch',
-    value: 15.2,
-    unit: '°',
-    status: 'normal',
-    timestamp: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    name: 'Generator Temp',
-    value: 78,
-    unit: '°C',
-    status: 'warning',
-    timestamp: new Date().toISOString(),
-  },
-  {
-    id: '5',
-    name: 'Gearbox Temp',
-    value: 65,
-    unit: '°C',
-    status: 'normal',
-    timestamp: new Date().toISOString(),
-  },
-  {
-    id: '6',
-    name: 'Vibration Level',
-    value: 2.3,
-    unit: 'mm/s',
-    status: 'normal',
-    timestamp: new Date().toISOString(),
-  },
-];
-
-// Power generation data for charts
-export const powerGenerationData: PowerData[] = [
-  { time: '00:00', power: 1.2, efficiency: 85 },
-  { time: '04:00', power: 0.8, efficiency: 72 },
-  { time: '08:00', power: 1.5, efficiency: 88 },
-  { time: '12:00', power: 2.1, efficiency: 92 },
-  { time: '16:00', power: 1.9, efficiency: 89 },
-  { time: '20:00', power: 1.4, efficiency: 81 },
-];
-
-// Temperature monitoring data
-export const temperatureData: TemperatureData[] = [
-  { time: '00:00', gearbox: 62, generator: 75, bearing: 45 },
-  { time: '04:00', gearbox: 58, generator: 71, bearing: 42 },
-  { time: '08:00', gearbox: 65, generator: 78, bearing: 48 },
-  { time: '12:00', gearbox: 70, generator: 82, bearing: 52 },
-  { time: '16:00', gearbox: 68, generator: 80, bearing: 50 },
-  { time: '20:00', gearbox: 63, generator: 76, bearing: 46 },
-];
-
-// Maintenance schedule data
-export const maintenanceTasks: MaintenanceTask[] = [
-  {
-    id: '1',
-    component: 'Blade Assembly',
-    type: 'Inspection',
-    priority: 'medium',
-    dueDate: '2025-01-15',
-    status: 'scheduled',
-    description: 'Visual inspection of blade surface and lightning protection',
-  },
-  {
-    id: '2',
-    component: 'Gearbox',
-    type: 'Oil Change',
-    priority: 'high',
-    dueDate: '2025-01-10',
-    status: 'in-progress',
-    description: 'Replace gearbox oil and filter',
-  },
-  {
-    id: '3',
-    component: 'Generator',
-    type: 'Cleaning',
-    priority: 'low',
-    dueDate: '2025-01-20',
-    status: 'scheduled',
-    description: 'Clean generator cooling system',
-  },
-  {
-    id: '4',
-    component: 'Main Bearing',
-    type: 'Lubrication',
-    priority: 'critical',
-    dueDate: '2025-01-08',
-    status: 'overdue',
-    description: 'Replace main bearing lubrication',
-  },
-];
-
-// System notifications
-export const notifications: Notification[] = [
-  {
-    id: '1',
-    type: 'warning',
-    title: 'High Generator Temperature',
-    message: 'Generator temperature has exceeded normal operating range',
-    timestamp: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'error',
-    title: 'Maintenance Overdue',
-    message: 'Main bearing lubrication is 2 days overdue',
-    timestamp: new Date(Date.now() - 600000).toISOString(), // 10 minutes ago
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'success',
-    title: 'System Optimization Complete',
-    message: 'Power optimization algorithm has improved efficiency by 3%',
-    timestamp: new Date(Date.now() - 1800000).toISOString(), // 30 minutes ago
-    read: true,
-  },
-  {
-    id: '4',
-    type: 'info',
-    title: 'Weather Update',
-    message: 'Favorable wind conditions expected for next 6 hours',
-    timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-    read: true,
-  },
-];
-
-// System status
-export const systemStatus = {
-  turbineStatus: 'operational',
-  connectionStatus: 'connected',
-  lastUpdate: new Date().toISOString(),
-  uptime: '45 days, 12 hours',
-  totalPowerGenerated: 2847.5, // kWh today
-  efficiency: 87.3, // percentage
+export const generateHistoricalData = (hours: number = 24) => {
+  const data = [];
+  const now = new Date();
+  
+  for (let i = hours; i >= 0; i--) {
+    const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000);
+    const baseWindSpeed = 8 + Math.sin(i * 0.1) * 4 + Math.random() * 2;
+    const powerOutput = Math.min(3.0, Math.max(0, (baseWindSpeed - 3) * 0.3));
+    const noiseLevel = 35 + baseWindSpeed * 0.8 + Math.random() * 5;
+    
+    data.push({
+      timestamp: timestamp.toISOString(),
+      powerOutput: Number(powerOutput.toFixed(2)),
+      windSpeed: Number(baseWindSpeed.toFixed(1)),
+      noiseLevel: Number(noiseLevel.toFixed(1)),
+      predicted: Number((powerOutput * (0.95 + Math.random() * 0.1)).toFixed(2)),
+    });
+  }
+  
+  return data;
 };
