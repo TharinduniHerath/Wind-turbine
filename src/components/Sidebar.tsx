@@ -72,3 +72,4 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
 };
 
 export default Sidebar;
+// added a comment
