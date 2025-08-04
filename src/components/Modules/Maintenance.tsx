@@ -60,6 +60,46 @@ interface MaintenanceItem {
   rul_days?: number;
 }
 
+interface HealthScoreData {
+  score: number;
+  trend: 'stable' | 'improving' | 'declining';
+}
+
+interface HealthScoresData {
+  [component: string]: HealthScoreData;
+}
+
+interface HealthAlert {
+  alert: boolean;
+  component?: string;
+  message?: string;
+}
+
+interface SystemStatus {
+  status: string;
+  message: string;
+  severity: 'optimal' | 'good' | 'fair' | 'poor' | 'critical' | 'unknown';
+  recommendations: string[];
+  metrics: {
+    average_health: number;
+    critical_components: number;
+    declining_components: number;
+    due_maintenance: number;
+    total_components: number;
+  };
+}
+
+interface MaintenanceItem {
+  component: string;
+  message: string;
+  last_service: string;
+  next_service: string;
+  duration: string;
+  priority: 'High' | 'Medium' | 'Low';
+  status: 'Due' | 'Scheduled' | 'Completed' | 'Monitoring';
+  rul_days?: number;
+}
+
 const Maintenance: React.FC = () => {
   const { currentData } = useTurbineStore();
 <<<<<<< Updated upstream
@@ -79,6 +119,7 @@ const Maintenance: React.FC = () => {
     ? Math.ceil((nextServiceDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : 0;
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   const maintenanceItems = [
     {
@@ -153,6 +194,8 @@ const Maintenance: React.FC = () => {
   };
 
 =======
+=======
+>>>>>>> Stashed changes
   // Fetch predictions from the FastAPI backend
   const fetchPredictions = async () => {
     try {
@@ -414,6 +457,9 @@ const Maintenance: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   return (
     <div className="p-6 space-y-6">
@@ -519,6 +565,7 @@ const Maintenance: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           <h3 className="text-white font-semibold mb-4">Component Health Status</h3>
           <div className="space-y-4">
             {[
@@ -572,6 +619,8 @@ const Maintenance: React.FC = () => {
                   </div>
                 </div>
 =======
+=======
+>>>>>>> Stashed changes
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-semibold">Predictive Analytics</h3>
             {isLoading && (
@@ -611,6 +660,146 @@ const Maintenance: React.FC = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">Annual Estimate</span>
                   <span className="text-amber-400 font-semibold">$147,000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+          <h3 className="text-white font-semibold mb-4">System Overview</h3>
+          <div className="space-y-4">
+            {/* Dynamic System Status */}
+            {systemStatus && (
+              <div className={`p-4 border rounded-lg ${
+                systemStatus.severity === 'optimal' ? 'bg-green-400/10 border-green-400/20' :
+                systemStatus.severity === 'good' ? 'bg-blue-400/10 border-blue-400/20' :
+                systemStatus.severity === 'fair' ? 'bg-amber-400/10 border-amber-400/20' :
+                systemStatus.severity === 'poor' ? 'bg-orange-400/10 border-orange-400/20' :
+                systemStatus.severity === 'critical' ? 'bg-red-400/10 border-red-400/20' :
+                'bg-slate-400/10 border-slate-400/20'
+              }`}>
+                <div className="flex items-start space-x-3">
+                  <div className={`w-5 h-5 mt-0.5 ${
+                    systemStatus.severity === 'optimal' ? 'text-green-400' :
+                    systemStatus.severity === 'good' ? 'text-blue-400' :
+                    systemStatus.severity === 'fair' ? 'text-amber-400' :
+                    systemStatus.severity === 'poor' ? 'text-orange-400' :
+                    systemStatus.severity === 'critical' ? 'text-red-400' :
+                    'text-slate-400'
+                  }`}>
+                    {systemStatus.severity === 'optimal' ? '✓' :
+                     systemStatus.severity === 'good' ? '✓' :
+                     systemStatus.severity === 'fair' ? '⚠' :
+                     systemStatus.severity === 'poor' ? '⚠' :
+                     systemStatus.severity === 'critical' ? '✗' :
+                     '?'}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className={`font-medium text-sm ${
+                      systemStatus.severity === 'optimal' ? 'text-green-400' :
+                      systemStatus.severity === 'good' ? 'text-blue-400' :
+                      systemStatus.severity === 'fair' ? 'text-amber-400' :
+                      systemStatus.severity === 'poor' ? 'text-orange-400' :
+                      systemStatus.severity === 'critical' ? 'text-red-400' :
+                      'text-slate-400'
+                    }`}>
+                      System Status: {systemStatus.status}
+                    </h4>
+                    <p className="text-slate-300 text-sm mt-1">
+                      {systemStatus.message}
+                    </p>
+                    {systemStatus.recommendations.length > 0 && (
+                      <div className="mt-2">
+                        <h5 className="text-slate-400 text-xs font-medium mb-1">Recommendations:</h5>
+                        <ul className="text-xs text-slate-400 space-y-1">
+                          {systemStatus.recommendations.slice(0, 3).map((rec, index) => (
+                            <li key={index} className="flex items-start space-x-1">
+                              <span className="text-slate-500">•</span>
+                              <span>{rec}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Fallback System Status */}
+            {!systemStatus && (
+              <div className="p-4 bg-blue-400/10 border border-blue-400/20 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <div className="w-5 h-5 text-blue-400 mt-0.5">✓</div>
+                  <div className="flex-1">
+                    <h4 className="text-blue-400 font-medium text-sm">
+                      System Status: Good
+                    </h4>
+                    <p className="text-slate-300 text-sm mt-1">
+                      System operating within normal parameters with minor attention needed.
+                    </p>
+                    <div className="mt-2">
+                      <h5 className="text-slate-400 text-xs font-medium mb-1">Recommendations:</h5>
+                      <ul className="text-xs text-slate-400 space-y-1">
+                        <li className="flex items-start space-x-1">
+                          <span className="text-slate-500">•</span>
+                          <span>Schedule routine maintenance</span>
+                        </li>
+                        <li className="flex items-start space-x-1">
+                          <span className="text-slate-500">•</span>
+                          <span>Monitor component health trends</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <h4 className="text-slate-300 text-sm">Performance Metrics</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Average Health Score</span>
+                  <span className="text-white">
+                    {systemStatus?.metrics?.average_health || 
+                     (Object.keys(healthScores).length > 0 
+                       ? Math.round(Object.values(healthScores).reduce((sum, data) => sum + data.score, 0) / Object.keys(healthScores).length)
+                       : 0)}%
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Components Monitored</span>
+                  <span className="text-white">{systemStatus?.metrics?.total_components || Object.keys(healthScores).length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Critical Components</span>
+                  <span className={`text-sm font-medium ${
+                    (systemStatus?.metrics?.critical_components || 0) > 0 ? 'text-red-400' : 'text-green-400'
+                  }`}>
+                    {systemStatus?.metrics?.critical_components || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Declining Components</span>
+                  <span className={`text-sm font-medium ${
+                    (systemStatus?.metrics?.declining_components || 0) > 0 ? 'text-amber-400' : 'text-green-400'
+                  }`}>
+                    {systemStatus?.metrics?.declining_components || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Due Maintenance</span>
+                  <span className={`text-sm font-medium ${
+                    (systemStatus?.metrics?.due_maintenance || 0) > 0 ? 'text-red-400' : 'text-green-400'
+                  }`}>
+                    {systemStatus?.metrics?.due_maintenance || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Last Update</span>
+                  <span className="text-white">{new Date().toLocaleTimeString()}</span>
                 </div>
               </div>
             </div>
