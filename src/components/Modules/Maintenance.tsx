@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, AlertTriangle, CheckCircle, Clock, Calendar, Wrench } from 'lucide-react';
 import { useTurbineStore } from '../../store/turbineStore';
-<<<<<<< Updated upstream
-=======
 import PredictiveAlert from '../Common/PredictiveAlert';
 import HealthScoreCard from '../Common/HealthScoreCard';
 import MaintenanceScheduleCard from '../Common/MaintenanceScheduleCard';
@@ -19,10 +17,48 @@ interface PredictionsData {
   [component: string]: ComponentPrediction;
 }
 
+interface HealthScoreData {
+  score: number;
+  trend: 'stable' | 'improving' | 'declining';
+}
+
+interface HealthScoresData {
+  [component: string]: HealthScoreData;
+}
+
+interface HealthAlert {
+  alert: boolean;
+  component?: string;
+  message?: string;
+}
+
+interface SystemStatus {
+  status: string;
+  message: string;
+  severity: 'optimal' | 'good' | 'fair' | 'poor' | 'critical' | 'unknown';
+  recommendations: string[];
+  metrics: {
+    average_health: number;
+    critical_components: number;
+    declining_components: number;
+    due_maintenance: number;
+    total_components: number;
+  };
+}
+
+interface MaintenanceItem {
+  component: string;
+  message: string;
+  last_service: string;
+  next_service: string;
+  duration: string;
+  priority: 'High' | 'Medium' | 'Low';
+  status: 'Due' | 'Scheduled' | 'Completed' | 'Monitoring';
+  rul_days?: number;
+}
+
 const Maintenance: React.FC = () => {
   const { currentData } = useTurbineStore();
-<<<<<<< Updated upstream
-=======
   const [predictions, setPredictions] = useState<PredictionsData>({});
   const [healthScores, setHealthScores] = useState<HealthScoresData>({});
   const [healthAlert, setHealthAlert] = useState<HealthAlert>({ alert: false });
@@ -30,85 +66,12 @@ const Maintenance: React.FC = () => {
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
->>>>>>> Stashed changes
 
   const maintenanceData = currentData?.maintenance;
   const nextServiceDate = maintenanceData?.nextService ? new Date(maintenanceData.nextService) : null;
   const daysUntilService = nextServiceDate 
     ? Math.ceil((nextServiceDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : 0;
-
-  const maintenanceItems = [
-    {
-      id: 1,
-      component: 'Gearbox Oil',
-      status: 'due',
-      priority: 'high',
-      lastService: '2024-01-15',
-      nextService: '2024-03-15',
-      description: 'Oil change and filter replacement required',
-      estimatedDuration: '4 hours',
-    },
-    {
-      id: 2,
-      component: 'Blade Inspection',
-      status: 'scheduled',
-      priority: 'medium',
-      lastService: '2023-12-10',
-      nextService: '2024-06-10',
-      description: 'Visual inspection and surface treatment',
-      estimatedDuration: '6 hours',
-    },
-    {
-      id: 3,
-      component: 'Generator Bearing',
-      status: 'completed',
-      priority: 'low',
-      lastService: '2024-02-20',
-      nextService: '2024-08-20',
-      description: 'Bearing lubrication and alignment check',
-      estimatedDuration: '3 hours',
-    },
-    {
-      id: 4,
-      component: 'Control System',
-      status: 'monitoring',
-      priority: 'medium',
-      lastService: '2024-01-30',
-      nextService: '2024-04-30',
-      description: 'Software update and sensor calibration',
-      estimatedDuration: '2 hours',
-    },
-  ];
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'due': return AlertTriangle;
-      case 'scheduled': return Clock;
-      case 'completed': return CheckCircle;
-      case 'monitoring': return Settings;
-      default: return Settings;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'due': return 'text-red-400 bg-red-400/10 border-red-400/20';
-      case 'scheduled': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
-      case 'completed': return 'text-green-400 bg-green-400/10 border-green-400/20';
-      case 'monitoring': return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
-      default: return 'text-slate-400 bg-slate-400/10 border-slate-400/20';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'text-red-400';
-      case 'medium': return 'text-amber-400';
-      case 'low': return 'text-green-400';
-      default: return 'text-slate-400';
-    }
-  };
 
   // Fetch predictions from the FastAPI backend
   const fetchPredictions = async () => {
@@ -371,37 +334,6 @@ const Maintenance: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch health scores on component mount and every 5 seconds
-  useEffect(() => {
-    fetchHealthScores();
-    
-    const interval = setInterval(fetchHealthScores, 5000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  // Fetch maintenance schedule on component mount and every 5 seconds
-  useEffect(() => {
-    fetchMaintenanceSchedule();
-    
-    const interval = setInterval(fetchMaintenanceSchedule, 5000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -417,99 +349,57 @@ const Maintenance: React.FC = () => {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800 rounded-xl p-6 border border-slate-700"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <Clock className="w-6 h-6 text-amber-400" />
-            <span className="text-amber-400 text-xs font-medium">UPCOMING</span>
+      {/* Component Health Status - Live ML Integration */}
+      <div className="bg-slate-800 rounded-xl border border-slate-700">
+        <div className="p-6 border-b border-slate-700">
+          <div className="flex items-center justify-between">
+            <h3 className="text-white font-semibold">Component Health Status</h3>
+            {isLoading && (
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                <span className="text-xs text-slate-400">Updating...</span>
+              </div>
+            )}
           </div>
-          <div className="space-y-2">
-            <h3 className="text-slate-300 text-sm">Next Service</h3>
-            <div className="flex items-baseline space-x-1">
-              <span className="text-2xl font-bold text-white">{daysUntilService}</span>
-              <span className="text-slate-400">days</span>
-            </div>
-            <div className="text-xs text-slate-500">
-              {nextServiceDate?.toLocaleDateString()}
-            </div>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Object.entries(healthScores).map(([component, data], index) => (
+              <HealthScoreCard
+                key={component}
+                component={component}
+                data={data}
+                index={index}
+              />
+            ))}
           </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-slate-800 rounded-xl p-6 border border-slate-700"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <Settings className="w-6 h-6 text-blue-400" />
-            <span className="text-green-400 text-xs font-medium">OPERATIONAL</span>
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-slate-300 text-sm">Operating Hours</h3>
-            <div className="flex items-baseline space-x-1">
-              <span className="text-2xl font-bold text-white">
-                {maintenanceData?.operatingHours.toLocaleString() || '0'}
-              </span>
-              <span className="text-slate-400">hrs</span>
+          
+          {Object.keys(healthScores).length === 0 && !isLoading && (
+            <div className="text-center py-8">
+              <div className="text-slate-400 text-sm">No health scores available</div>
             </div>
-            <div className="text-xs text-slate-500">
-              Since installation
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-slate-800 rounded-xl p-6 border border-slate-700"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <AlertTriangle className="w-6 h-6 text-red-400" />
-            <span className="text-red-400 text-xs font-medium">DUE</span>
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-slate-300 text-sm">Overdue Items</h3>
-            <div className="flex items-baseline space-x-1">
-              <span className="text-2xl font-bold text-white">1</span>
-              <span className="text-slate-400">item</span>
-            </div>
-            <div className="text-xs text-slate-500">
-              Requires attention
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-slate-800 rounded-xl p-6 border border-slate-700"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <CheckCircle className="w-6 h-6 text-green-400" />
-            <span className="text-green-400 text-xs font-medium">COMPLETED</span>
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-slate-300 text-sm">This Month</h3>
-            <div className="flex items-baseline space-x-1">
-              <span className="text-2xl font-bold text-white">3</span>
-              <span className="text-slate-400">items</span>
-            </div>
-            <div className="text-xs text-slate-500">
-              On schedule
-            </div>
-          </div>
-        </motion.div>
+          )}
+        </div>
       </div>
 
-      {/* Maintenance Schedule */}
+      {/* Health Alert */}
+      {healthAlert.alert && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 bg-red-400/10 border border-red-400/20 rounded-lg"
+        >
+          <div className="flex items-start space-x-3">
+            <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5" />
+            <div>
+              <h4 className="text-red-400 font-medium text-sm">Health Alert</h4>
+              <p className="text-slate-300 text-sm mt-1">{healthAlert.message}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* LSTM Maintenance Schedule */}
       <div className="bg-slate-800 rounded-xl border border-slate-700">
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center justify-between">
@@ -527,168 +417,51 @@ const Maintenance: React.FC = () => {
         </div>
         <div className="p-6">
           <div className="space-y-4">
-            {maintenanceItems.map((item, index) => {
-              const StatusIcon = getStatusIcon(item.status);
-              const statusColor = getStatusColor(item.status);
-              const priorityColor = getPriorityColor(item.priority);
-              
-              return (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-start space-x-4 p-4 bg-slate-900 rounded-lg hover:bg-slate-700 transition-colors"
-                >
-                  <div className={`p-2 rounded-lg ${statusColor}`}>
-                    <StatusIcon className="w-5 h-5" />
-                  </div>
-                  
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="text-white font-medium">{item.component}</h4>
-                        <p className="text-slate-400 text-sm">{item.description}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`text-xs px-2 py-1 rounded-full capitalize ${priorityColor.replace('text-', 'bg-').replace('-400', '-400/10')} ${priorityColor}`}>
-                          {item.priority}
-                        </span>
-                        <span className={`text-xs px-2 py-1 rounded-full capitalize ${statusColor}`}>
-                          {item.status}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <span className="text-slate-500">Last Service:</span>
-                        <div className="text-slate-300">{new Date(item.lastService).toLocaleDateString()}</div>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Next Service:</span>
-                        <div className="text-slate-300">{new Date(item.nextService).toLocaleDateString()}</div>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Duration:</span>
-                        <div className="text-slate-300">{item.estimatedDuration}</div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+            {maintenanceSchedule.map((item, index) => (
+              <MaintenanceScheduleCard
+                key={item.component}
+                item={item}
+                index={index}
+              />
+            ))}
+            
+            {maintenanceSchedule.length === 0 && !isLoading && (
+              <div className="text-center py-8">
+                <div className="text-slate-400 text-sm">No maintenance schedule available</div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Component Health */}
+      {/* Predictive Analytics - Dynamic Component Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <h3 className="text-white font-semibold mb-4">Component Health Status</h3>
-          <div className="space-y-4">
-            {[
-              { name: 'Main Bearing', health: 95, trend: 'stable', color: 'bg-green-400' },
-              { name: 'Gearbox', health: 78, trend: 'declining', color: 'bg-amber-400' },
-              { name: 'Generator', health: 92, trend: 'improving', color: 'bg-green-400' },
-              { name: 'Power Electronics', health: 88, trend: 'stable', color: 'bg-green-400' },
-              { name: 'Blade System', health: 85, trend: 'declining', color: 'bg-amber-400' },
-              { name: 'Control System', health: 98, trend: 'stable', color: 'bg-green-400' },
-            ].map((component, index) => (
-              <div key={component.name} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-300 text-sm">{component.name}</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-white text-sm">{component.health}%</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      component.trend === 'improving' ? 'bg-green-400/10 text-green-400' :
-                      component.trend === 'declining' ? 'bg-amber-400/10 text-amber-400' :
-                      'bg-blue-400/10 text-blue-400'
-                    }`}>
-                      {component.trend}
-                    </span>
-                  </div>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2">
-                  <motion.div
-                    className={`h-2 rounded-full ${component.color}`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${component.health}%` }}
-                    transition={{ delay: index * 0.1, duration: 1 }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Predictive Analytics - Dynamic Component Alerts */}
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <h3 className="text-white font-semibold mb-4">Predictive Analytics</h3>
-          <div className="space-y-6">
-            <div className="p-4 bg-amber-400/10 border border-amber-400/20 rounded-lg">
-              <div className="flex items-start space-x-3">
-                <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5" />
-                <div>
-                  <h4 className="text-amber-400 font-medium text-sm">Gearbox Alert</h4>
-                  <p className="text-slate-300 text-sm mt-1">
-                    Oil temperature trending higher than normal. Schedule inspection within 2 weeks.
-                  </p>
-                  <div className="mt-2 text-xs text-slate-400">
-                    Confidence: 87% • Based on 3 months of data
-                  </div>
-                </div>
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-semibold">Predictive Analytics</h3>
             {isLoading && (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
                 <span className="text-xs text-slate-400">Updating...</span>
->>>>>>> Stashed changes
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="p-4 bg-blue-400/10 border border-blue-400/20 rounded-lg">
-              <div className="flex items-start space-x-3">
-                <Calendar className="w-5 h-5 text-blue-400 mt-0.5" />
-                <div>
-                  <h4 className="text-blue-400 font-medium text-sm">Optimization Opportunity</h4>
-                  <p className="text-slate-300 text-sm mt-1">
-                    Blade pitch adjustment could improve efficiency by 2.3% with current wind patterns.
-                  </p>
-                  <div className="mt-2 text-xs text-slate-400">
-                    Recommended action: Schedule calibration
-                  </div>
-                </div>
+          <div className="space-y-4">
+            {Object.entries(predictions).map(([component, prediction], index) => (
+              <PredictiveAlert
+                key={component}
+                component={component}
+                prediction={prediction}
+                index={index}
+              />
+            ))}
+            
+            {Object.keys(predictions).length === 0 && !isLoading && (
+              <div className="text-center py-8">
+                <div className="text-slate-400 text-sm">No predictions available</div>
               </div>
-            </div>
-
-            <div className="space-y-3">
-              <h4 className="text-slate-300 text-sm">Maintenance Cost Forecast</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Next 30 Days</span>
-                  <span className="text-white">$12,500</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Next 90 Days</span>
-                  <span className="text-white">$28,900</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Annual Estimate</span>
-                  <span className="text-amber-400 font-semibold">$147,000</span>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -829,99 +602,6 @@ const Maintenance: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <h3 className="text-white font-semibold mb-4">System Overview</h3>
-          <div className="space-y-4">
-            {/* Dynamic System Status */}
-            {systemStatus && (
-              <div className={`p-4 border rounded-lg ${
-                systemStatus.severity === 'optimal' ? 'bg-green-400/10 border-green-400/20' :
-                systemStatus.severity === 'good' ? 'bg-blue-400/10 border-blue-400/20' :
-                systemStatus.severity === 'fair' ? 'bg-amber-400/10 border-amber-400/20' :
-                systemStatus.severity === 'poor' ? 'bg-orange-400/10 border-orange-400/20' :
-                systemStatus.severity === 'critical' ? 'bg-red-400/10 border-red-400/20' :
-                'bg-slate-400/10 border-slate-400/20'
-              }`}>
-                <div className="flex items-start space-x-3">
-                  <div className={`w-5 h-5 mt-0.5 ${
-                    systemStatus.severity === 'optimal' ? 'text-green-400' :
-                    systemStatus.severity === 'good' ? 'text-blue-400' :
-                    systemStatus.severity === 'fair' ? 'text-amber-400' :
-                    systemStatus.severity === 'poor' ? 'text-orange-400' :
-                    systemStatus.severity === 'critical' ? 'text-red-400' :
-                    'text-slate-400'
-                  }`}>
-                    {systemStatus.severity === 'optimal' ? '✓' :
-                     systemStatus.severity === 'good' ? '✓' :
-                     systemStatus.severity === 'fair' ? '⚠' :
-                     systemStatus.severity === 'poor' ? '⚠' :
-                     systemStatus.severity === 'critical' ? '✗' :
-                     '?'}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className={`font-medium text-sm ${
-                      systemStatus.severity === 'optimal' ? 'text-green-400' :
-                      systemStatus.severity === 'good' ? 'text-blue-400' :
-                      systemStatus.severity === 'fair' ? 'text-amber-400' :
-                      systemStatus.severity === 'poor' ? 'text-orange-400' :
-                      systemStatus.severity === 'critical' ? 'text-red-400' :
-                      'text-slate-400'
-                    }`}>
-                      System Status: {systemStatus.status}
-                    </h4>
-                    <p className="text-slate-300 text-sm mt-1">
-                      {systemStatus.message}
-                    </p>
-                    {systemStatus.recommendations.length > 0 && (
-                      <div className="mt-2">
-                        <h5 className="text-slate-400 text-xs font-medium mb-1">Recommendations:</h5>
-                        <ul className="text-xs text-slate-400 space-y-1">
-                          {systemStatus.recommendations.slice(0, 3).map((rec, index) => (
-                            <li key={index} className="flex items-start space-x-1">
-                              <span className="text-slate-500">•</span>
-                              <span>{rec}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Fallback System Status */}
-            {!systemStatus && (
-              <div className="p-4 bg-blue-400/10 border border-blue-400/20 rounded-lg">
-                <div className="flex items-start space-x-3">
-                  <div className="w-5 h-5 text-blue-400 mt-0.5">✓</div>
-                  <div className="flex-1">
-                    <h4 className="text-blue-400 font-medium text-sm">
-                      System Status: Good
-                    </h4>
-                    <p className="text-slate-300 text-sm mt-1">
-                      System operating within normal parameters with minor attention needed.
-                    </p>
-                    <div className="mt-2">
-                      <h5 className="text-slate-400 text-xs font-medium mb-1">Recommendations:</h5>
-                      <ul className="text-xs text-slate-400 space-y-1">
-                        <li className="flex items-start space-x-1">
-                          <span className="text-slate-500">•</span>
-                          <span>Schedule routine maintenance</span>
-                        </li>
-                        <li className="flex items-start space-x-1">
-                          <span className="text-slate-500">•</span>
-                          <span>Monitor component health trends</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
