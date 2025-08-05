@@ -64,13 +64,6 @@ const Header: React.FC = () => {
             Last Update: <span className="text-white">{currentData ? new Date(currentData.timestamp).toLocaleTimeString() : 'N/A'}</span>
           </div>
         </div>
-        
-        {alerts.length > 0 && (
-          <div className="flex items-center space-x-2 text-amber-400">
-            <AlertTriangle className="w-4 h-4" />
-            <span>{alerts.length} Active Alert{alerts.length > 1 ? 's' : ''}</span>
-          </div>
-        )}
       </div>
     </header>
   );

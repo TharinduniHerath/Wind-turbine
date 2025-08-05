@@ -5,6 +5,7 @@ import { useTurbineStore } from '../../store/turbineStore';
 import PredictiveAlert from '../Common/PredictiveAlert';
 import HealthScoreCard from '../Common/HealthScoreCard';
 import MaintenanceScheduleCard from '../Common/MaintenanceScheduleCard';
+import TurbineSelector from '../Common/TurbineSelector';
 
 interface ComponentPrediction {
   status: 'Critical' | 'Warning' | 'Normal';
@@ -58,7 +59,7 @@ interface MaintenanceItem {
 }
 
 const Maintenance: React.FC = () => {
-  const { currentData } = useTurbineStore();
+  const { currentData, selectedTurbine } = useTurbineStore();
   const [predictions, setPredictions] = useState<PredictionsData>({});
   const [healthScores, setHealthScores] = useState<HealthScoresData>({});
   const [healthAlert, setHealthAlert] = useState<HealthAlert>({ alert: false });
@@ -82,7 +83,7 @@ const Maintenance: React.FC = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
       
-      const response = await fetch('http://localhost:8000/api/predict', {
+      const response = await fetch(`http://localhost:8000/api/predict?turbine=${selectedTurbine}`, {
         signal: controller.signal,
         headers: {
           'Cache-Control': 'no-cache',
@@ -158,7 +159,7 @@ const Maintenance: React.FC = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
       
-      const response = await fetch('http://localhost:8000/api/health-scores', {
+      const response = await fetch(`http://localhost:8000/api/health-scores?turbine=${selectedTurbine}`, {
         signal: controller.signal,
         headers: {
           'Cache-Control': 'no-cache',
@@ -203,7 +204,7 @@ const Maintenance: React.FC = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
       
-      const response = await fetch('http://localhost:8000/api/maintenance-schedule', {
+      const response = await fetch(`http://localhost:8000/api/maintenance-schedule?turbine=${selectedTurbine}`, {
         signal: controller.signal,
         headers: {
           'Cache-Control': 'no-cache',
@@ -314,7 +315,7 @@ const Maintenance: React.FC = () => {
     const interval = setInterval(fetchPredictions, 3000); // Changed from 5000 to 3000
     
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedTurbine]);
 
   // Fetch health scores on component mount and every 5 seconds
   useEffect(() => {
@@ -323,7 +324,7 @@ const Maintenance: React.FC = () => {
     const interval = setInterval(fetchHealthScores, 5000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedTurbine]);
 
   // Fetch maintenance schedule on component mount and every 5 seconds
   useEffect(() => {
@@ -332,7 +333,7 @@ const Maintenance: React.FC = () => {
     const interval = setInterval(fetchMaintenanceSchedule, 5000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedTurbine]);
 
   return (
     <div className="p-6 space-y-6">
@@ -344,8 +345,11 @@ const Maintenance: React.FC = () => {
             Predictive maintenance scheduling and component health monitoring
           </p>
         </div>
-        <div className="p-4 rounded-xl bg-amber-400/10 border border-amber-400/20">
-          <Wrench className="w-8 h-8 text-amber-400" />
+        <div className="flex items-center space-x-4">
+          <TurbineSelector />
+          <div className="p-4 rounded-xl bg-amber-400/10 border border-amber-400/20">
+            <Wrench className="w-8 h-8 text-amber-400" />
+          </div>
         </div>
       </div>
 

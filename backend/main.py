@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import json
 import random
 from fastapi.responses import JSONResponse
+from turbine_data import get_turbine_health_scores, get_turbine_predictions
 
 app = FastAPI(
     title="Wind Turbine ML API",
@@ -870,10 +871,11 @@ async def predict_failure_endpoint(data: TurbineData):
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
 @app.get("/api/predict")
-async def get_component_predictions():
+async def get_component_predictions(turbine: str = "Turbine-1"):
     """Get component-specific predictions using the Random Forest model"""
     try:
-        predictions = generate_component_predictions()
+        print(f"🔧 Generating predictions for {turbine}")
+        predictions = get_turbine_predictions(turbine)
         
         # Add cache control headers to prevent caching issues
         return JSONResponse(
@@ -999,10 +1001,11 @@ async def get_analytics_summary():
     }
 
 @app.get("/api/health-scores")
-async def get_health_scores():
+async def get_health_scores(turbine: str = "Turbine-1"):
     """Get component health scores using the Random Forest model"""
     try:
-        health_scores = calculate_component_health_scores()
+        print(f"🏥 Getting health scores for {turbine}")
+        health_scores = get_turbine_health_scores(turbine)
         alerts = check_health_alerts(health_scores)
         
         response = {
@@ -1049,9 +1052,10 @@ async def get_health_scores():
         )
 
 @app.get("/api/maintenance-schedule")
-async def get_maintenance_schedule():
+async def get_maintenance_schedule(turbine: str = "Turbine-1"):
     """Get maintenance schedule predictions using the LSTM model"""
     try:
+        print(f"🔧 Getting maintenance schedule for {turbine}")
         maintenance_schedule = predict_maintenance_schedule()
         
         return JSONResponse(
