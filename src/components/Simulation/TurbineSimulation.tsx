@@ -3,6 +3,13 @@ import { motion } from 'framer-motion';
 import { useTurbineStore } from '../../store/turbineStore';
 import { Maximize2, RotateCcw, Settings, Play, Pause } from 'lucide-react';
 
+function getHealthColor(component: string, currentData: any) {
+  const status = currentData?.health?.[component];
+  if (status === 'warning') return '#facc15';
+  if (status === 'critical') return '#dc2626';
+  return '#10b981';
+}
+
 const TurbineSimulation: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -53,9 +60,37 @@ const TurbineSimulation: React.FC = () => {
       ctx.translate(centerX, centerY + 50);
       ctx.rotate((turbineAnimation.yaw * Math.PI) / 180);
       
-      // Nacelle body
+      // --- cutaway nacelle ---
       ctx.fillStyle = '#d1d5db';
-      ctx.fillRect(-nacelleWidth/2, -nacelleHeight/2, nacelleWidth, nacelleHeight);
+      ctx.beginPath();
+      ctx.moveTo(-nacelleWidth/2, -nacelleHeight/2);
+      ctx.lineTo(nacelleWidth/2, -nacelleHeight/2);
+      ctx.lineTo(nacelleWidth/2, 0);
+      ctx.lineTo(-nacelleWidth/2, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // --- internals ---
+      ctx.fillStyle = getHealthColor('gearbox', currentData);
+      ctx.fillRect(-nacelleWidth/4, -nacelleHeight/4, nacelleWidth/6, nacelleHeight/4);
+
+      ctx.fillStyle = getHealthColor('bearing', currentData);
+      ctx.beginPath();
+      ctx.arc(-nacelleWidth/8, nacelleHeight/8, 6, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.fillStyle = getHealthColor('generator', currentData);
+      ctx.fillRect(nacelleWidth/8, -nacelleHeight/4, nacelleWidth/5, nacelleHeight/3);
+
+      ctx.fillStyle = getHealthColor('electronics', currentData);
+      ctx.fillRect(0, 0, nacelleWidth/8, nacelleHeight/6);
+
+      ctx.fillStyle = getHealthColor('sensor', currentData);
+      [-nacelleWidth/3, 0, nacelleWidth/3].forEach(x => {
+        ctx.beginPath();
+        ctx.arc(x, nacelleHeight/8, 3, 0, Math.PI*2);
+        ctx.fill();
+      });
       
       // Hub
       const hubRadius = 12;

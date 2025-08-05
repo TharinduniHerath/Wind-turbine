@@ -26,6 +26,13 @@ export interface TurbineData {
     operatingHours: number;
     alerts: Alert[];
   };
+  health?: {
+    gearbox: 'normal' | 'warning' | 'critical';
+    bearing: 'normal' | 'warning' | 'critical';
+    generator: 'normal' | 'warning' | 'critical';
+    electronics: 'normal' | 'warning' | 'critical';
+    sensor: 'normal' | 'warning' | 'critical';
+  };
 }
 
 export interface Alert {

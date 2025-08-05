@@ -6,6 +6,8 @@ import PredictiveAlert from '../Common/PredictiveAlert';
 import HealthScoreCard from '../Common/HealthScoreCard';
 import MaintenanceScheduleCard from '../Common/MaintenanceScheduleCard';
 import TurbineSelector from '../Common/TurbineSelector';
+import TurbineSimulation from '../Simulation/TurbineSimulation';
+
 
 interface ComponentPrediction {
   status: 'Critical' | 'Warning' | 'Normal';
@@ -471,6 +473,9 @@ const Maintenance: React.FC = () => {
 
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h3 className="text-white font-semibold mb-4">System Overview</h3>
+          <div className="system-overview-simulation my-6">
+            <TurbineSimulation />
+          </div>
           <div className="space-y-4">
             {/* Dynamic System Status */}
             {systemStatus && (
@@ -609,6 +614,7 @@ const Maintenance: React.FC = () => {
           </div>
         </div>
       </div>
+
     </div>
   );
 };

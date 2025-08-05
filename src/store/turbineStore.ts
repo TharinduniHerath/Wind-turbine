@@ -179,6 +179,13 @@ export const useTurbineStore = create<TurbineStore>((set, get) => ({
         operatingHours: 8742,
         alerts: [],
       },
+      health: {
+        gearbox: 'warning',
+        bearing: 'normal',
+        generator: 'normal',
+        electronics: 'critical',
+        sensor: 'normal',
+      },
     };
     
     get().updateTurbineData(mockData);
