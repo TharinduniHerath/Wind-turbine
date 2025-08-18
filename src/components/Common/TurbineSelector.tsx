@@ -6,9 +6,9 @@ const TurbineSelector: React.FC = () => {
   const { selectedTurbine, setSelectedTurbine } = useTurbineStore();
 
   const turbines = [
-    { id: 'Turbine-1', name: 'Turbine-1' },
-    { id: 'Turbine-2', name: 'Turbine-2' },
-    { id: 'Turbine-3', name: 'Turbine-3' },
+    { id: 'Turbine-1', name: 'WD-Turbine-1' },
+    { id: 'Turbine-2', name: 'WD-Turbine-2' },
+    { id: 'Turbine-3', name: 'WD-Turbine-3' },
   ];
 
   return (
