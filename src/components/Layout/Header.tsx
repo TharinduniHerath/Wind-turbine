@@ -1,11 +1,10 @@
 import React from 'react';
-import { Bell, Settings, Power, AlertTriangle } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTurbineStore } from '../../store/turbineStore';
 
 const Header: React.FC = () => {
-  const { alerts, currentData } = useTurbineStore();
-  const activeAlerts = alerts.filter(alert => alert.type === 'error').length;
+  const { currentData } = useTurbineStore();
   const isOnline = currentData !== null;
 
   return (
@@ -34,23 +33,6 @@ const Header: React.FC = () => {
               {isOnline ? 'Connected' : 'Offline'}
             </span>
           </div>
-          
-          {/* Alerts */}
-          <div className="relative">
-            <button className="p-2 text-slate-400 hover:text-white transition-colors">
-              <Bell className="w-5 h-5" />
-              {activeAlerts > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {activeAlerts}
-                </span>
-              )}
-            </button>
-          </div>
-          
-          {/* Settings */}
-          <button className="p-2 text-slate-400 hover:text-white transition-colors">
-            <Settings className="w-5 h-5" />
-          </button>
         </div>
       </div>
       

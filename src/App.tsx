@@ -5,7 +5,7 @@ import { generateMockTurbineData } from './data/mockData';
 import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar';
 import Overview from './components/Modules/Overview';
-import NoiseMonitoring from './components/Modules/NoiseMonitoring';
+
 import PowerOptimization from './components/Modules/PowerOptimization';
 import WeatherImpact from './components/Modules/WeatherImpact';
 import Maintenance from './components/Modules/Maintenance';
@@ -30,7 +30,7 @@ function App() {
       // Randomly generate alerts
       if (Math.random() < 0.1) { // 10% chance per update
         const alertTypes = ['warning', 'error', 'info'] as const;
-        const modules = ['noise', 'power', 'weather', 'maintenance'] as const;
+        const modules = ['power', 'weather', 'maintenance'] as const;
         const alertMessages = [
           'System performance within normal parameters',
           'Blade vibration slightly elevated',
@@ -55,18 +55,24 @@ function App() {
   }, [initializeData, updateTurbineData, addAlert]);
 
   const renderActiveModule = () => {
+    console.log('🔧 renderActiveModule called with activeModule:', activeModule);
+    
     switch (activeModule) {
       case 'overview':
+        console.log('🔧 Rendering Overview component');
         return <Overview />;
-      case 'noise':
-        return <NoiseMonitoring />;
+
       case 'power':
+        console.log('🔧 Rendering PowerOptimization component');
         return <PowerOptimization />;
       case 'weather':
+        console.log('🔧 Rendering WeatherImpact component');
         return <WeatherImpact />;
       case 'maintenance':
+        console.log('🔧 Rendering Maintenance component');
         return <Maintenance />;
       default:
+        console.log('🔧 Rendering default Overview component');
         return <Overview />;
     }
   };

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
@@ -10,8 +10,16 @@ import os
 from datetime import datetime, timedelta
 import json
 import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from fastapi.responses import JSONResponse
-from turbine_data import get_turbine_health_scores, get_turbine_predictions
+from turbine_data import get_turbine_health_scores, get_turbine_predictions, generate_dynamic_sensor_data
+
+from lstm_predictor import get_lstm_maintenance_schedule
+from ml_health_predictor import get_ml_health_scores
+from predictive_analytics_predictor import get_ml_predictive_analytics
+
 
 app = FastAPI(
     title="Wind Turbine ML API",
@@ -22,7 +30,7 @@ app = FastAPI(
 # CORS middleware for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176", "http://localhost:5177", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -68,6 +76,16 @@ class HealthScore(BaseModel):
     next_maintenance: str
     risk_level: str
 
+
+
+# Email models
+class MaintenanceEmailRequest(BaseModel):
+    to: str
+    subject: str
+    technician: str
+    components: List[str]
+    turbineId: str
+
 # Global variables for models
 rf_model = None
 lstm_model = None
@@ -75,13 +93,18 @@ scaler = None
 feature_names = None
 previous_health_scores = {}  # Store previous scores for trend calculation
 
+# Email history storage
+email_history = []
+
+
+
 def load_models():
     """Load the trained ML models"""
     global rf_model, lstm_model, scaler, feature_names
     
     try:
-        # Load models from the Data/models directory
-        model_path = "../Data/models/"
+        # Load models from the BD/models directory
+        model_path = "../BD/models/"
         
         # Load Random Forest model
         rf_model = joblib.load(f"{model_path}random_forest_model.pkl")
@@ -92,9 +115,13 @@ def load_models():
         # Load scaler
         scaler = joblib.load(f"{model_path}scaler.pkl")
         
-        # Load feature names
-        with open("../Data/preprocessed_data/feature_names.json", "r") as f:
-            feature_names = json.load(f)
+        # Load feature names (check if file exists)
+        try:
+            with open("../BD/preprocessed_data/feature_names.json", "r") as f:
+                feature_names = json.load(f)
+        except FileNotFoundError:
+            print("⚠️ feature_names.json not found, using default features")
+            feature_names = None
             
         print("✅ All models loaded successfully")
         return True
@@ -830,6 +857,8 @@ async def startup_event():
     else:
         print("⚠️ API running with fallback predictions")
 
+
+
 @app.get("/")
 async def root():
     """Health check endpoint"""
@@ -872,14 +901,19 @@ async def predict_failure_endpoint(data: TurbineData):
 
 @app.get("/api/predict")
 async def get_component_predictions(turbine: str = "Turbine-1"):
-    """Get component-specific predictions using the Random Forest model"""
+    """Get LSTM-based component predictions using the neural network model"""
+    print("🚀 ENHANCED PREDICT FUNCTION STARTED")
     try:
-        print(f"🔧 Generating predictions for {turbine}")
-        predictions = get_turbine_predictions(turbine)
+        print(f"🔧 Getting LSTM-based predictive analytics for {turbine}")
+        predictions = get_ml_predictive_analytics(turbine)
+        print(f"✅ LSTM generated {len(predictions)} predictions for {turbine}")
+        
+        # Use the ML predictions directly
+        enhanced_predictions = predictions
         
         # Add cache control headers to prevent caching issues
         return JSONResponse(
-            content=predictions,
+            content=enhanced_predictions,
             headers={
                 "Cache-Control": "no-cache, no-store, must-revalidate",
                 "Pragma": "no-cache",
@@ -887,56 +921,74 @@ async def get_component_predictions(turbine: str = "Turbine-1"):
             }
         )
     except Exception as e:
-        print(f"API Error: {e}")
-        # Return fallback predictions even on error
-        fallback_predictions = {
-            "Gearbox": {
-                "status": "Normal",
-                "message": "Gearbox operating within normal parameters.",
-                "confidence": "85%",
-                "based_on": "30 days of logs"
-            },
-            "Bearings": {
-                "status": "Normal",
-                "message": "Bearing vibration levels are stable and within range.",
-                "confidence": "88%",
-                "based_on": "6 weeks of data"
-            },
-            "Generator": {
-                "status": "Normal",
-                "message": "Generator operating efficiently with stable output.",
-                "confidence": "92%",
-                "based_on": "2 months of telemetry"
-            },
-            "Rotors": {
-                "status": "Normal",
-                "message": "Rotor balance is optimal for current conditions.",
-                "confidence": "87%",
-                "based_on": "3 months of sensor data"
-            },
-            "Blades": {
-                "status": "Normal",
-                "message": "Blade aerodynamics are stable and efficient.",
-                "confidence": "90%",
-                "based_on": "60 days of telemetry"
-            },
-            "Temperature Sensors": {
-                "status": "Normal",
-                "message": "Temperature sensors operating within calibration range.",
-                "confidence": "89%",
-                "based_on": "90 days of data"
+        print(f"❌ Error in ML predictive analytics: {e}")
+        print(f"🔍 Exception type: {type(e).__name__}")
+        import traceback
+        print(f"🔍 Full traceback: {traceback.format_exc()}")
+        # Fallback to heuristic method
+        try:
+            print("🔄 Falling back to heuristic predictions")
+            predictions = get_turbine_predictions(turbine)
+            return JSONResponse(
+                content=predictions,
+                status_code=200,
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
+            )
+        except Exception as fallback_error:
+            print(f"❌ Fallback predictions also failed: {fallback_error}")
+            # Return basic fallback
+            fallback_predictions = {
+                "Gearbox": {
+                    "status": "Normal",
+                    "message": "Gearbox operating within normal parameters (fallback mode).",
+                    "confidence": "75%",
+                    "based_on": "Heuristic analysis + sensor data"
+                },
+                "Bearings": {
+                    "status": "Normal",
+                    "message": "Bearing vibration levels are stable and within range (fallback mode).",
+                    "confidence": "78%",
+                    "based_on": "Heuristic analysis + sensor data"
+                },
+                "Generator": {
+                    "status": "Normal",
+                    "message": "Generator operating efficiently with stable output (fallback mode).",
+                    "confidence": "82%",
+                    "based_on": "Heuristic analysis + sensor data"
+                },
+                "Rotors": {
+                    "status": "Normal",
+                    "message": "Rotor balance is optimal for current conditions (fallback mode).",
+                    "confidence": "80%",
+                    "based_on": "Heuristic analysis + sensor data"
+                },
+                "Blades": {
+                    "status": "Normal",
+                    "message": "Blade aerodynamics are stable and efficient (fallback mode).",
+                    "confidence": "85%",
+                    "based_on": "Heuristic analysis + sensor data"
+                },
+                "Temperature Sensors": {
+                    "status": "Normal",
+                    "message": "Temperature sensors operating within calibration range (fallback mode).",
+                    "confidence": "78%",
+                    "based_on": "Heuristic analysis + sensor data"
+                }
             }
-        }
-        
-        return JSONResponse(
-            content=fallback_predictions,
-            status_code=200,  # Return 200 even on error to prevent frontend failures
-            headers={
-                "Cache-Control": "no-cache, no-store, must-revalidate",
-                "Pragma": "no-cache",
-                "Expires": "0"
-            }
-        )
+            
+            return JSONResponse(
+                content=fallback_predictions,
+                status_code=200,
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
+            )
 
 @app.get("/health/components")
 async def get_component_health():
@@ -1002,16 +1054,22 @@ async def get_analytics_summary():
 
 @app.get("/api/health-scores")
 async def get_health_scores(turbine: str = "Turbine-1"):
-    """Get component health scores using the Random Forest model"""
+    """Get ML-based component health scores using the Random Forest model"""
     try:
-        print(f"🏥 Getting health scores for {turbine}")
-        health_scores = get_turbine_health_scores(turbine)
+        print(f"🏥 Getting ML-based health scores for {turbine}")
+        
+        # Get health scores from ML predictor
+        health_scores = get_ml_health_scores(turbine)
+        
+        # Generate alerts based on ML predictions
         alerts = check_health_alerts(health_scores)
         
         response = {
             "health_scores": health_scores,
             "alerts": alerts
         }
+        
+        print(f"✅ ML generated health scores for {turbine}: {len(health_scores)} components")
         
         return JSONResponse(
             content=response,
@@ -1023,40 +1081,65 @@ async def get_health_scores(turbine: str = "Turbine-1"):
         )
         
     except Exception as e:
-        print(f"API Error in health scores: {e}")
-        # Return fallback response
-        fallback_response = {
-            "health_scores": {
-                "Main Bearing": {"score": 95, "trend": "stable"},
-                "Gearbox": {"score": 78, "trend": "declining"},
-                "Generator": {"score": 92, "trend": "improving"},
-                "Power Electronics": {"score": 88, "trend": "stable"},
-                "Blade System": {"score": 85, "trend": "declining"},
-                "Control System": {"score": 98, "trend": "stable"}
-            },
-            "alerts": {
-                "alert": True,
-                "component": "Gearbox",
-                "message": "Gearbox health score dropped to 78% and trend is declining. Schedule inspection."
+        print(f"❌ Error in ML health scores: {e}")
+        # Fallback to original method
+        try:
+            health_scores = get_turbine_health_scores(turbine)
+            alerts = check_health_alerts(health_scores)
+            
+            response = {
+                "health_scores": health_scores,
+                "alerts": alerts
             }
-        }
-        
-        return JSONResponse(
-            content=fallback_response,
-            status_code=200,
-            headers={
-                "Cache-Control": "no-cache, no-store, must-revalidate",
-                "Pragma": "no-cache",
-                "Expires": "0"
+            
+            return JSONResponse(
+                content=response,
+                status_code=200,
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
+            )
+        except Exception as fallback_error:
+            print(f"❌ Fallback health scores also failed: {fallback_error}")
+            # Return basic fallback
+            fallback_response = {
+                "health_scores": {
+                    "Main Bearing": {"score": 95, "trend": "stable"},
+                    "Gearbox": {"score": 78, "trend": "declining"},
+                    "Generator": {"score": 92, "trend": "improving"},
+                    "Power Electronics": {"score": 88, "trend": "stable"},
+                    "Blade System": {"score": 85, "trend": "declining"},
+                    "Control System": {"score": 98, "trend": "stable"}
+                },
+                "alerts": {
+                    "alert": True,
+                    "component": "Gearbox",
+                    "message": "Gearbox health score dropped to 78% and trend is declining. Schedule inspection."
+                }
             }
-        )
+            
+            return JSONResponse(
+                content=fallback_response,
+                status_code=200,
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
+            )
 
 @app.get("/api/maintenance-schedule")
 async def get_maintenance_schedule(turbine: str = "Turbine-1"):
     """Get maintenance schedule predictions using the LSTM model"""
     try:
-        print(f"🔧 Getting maintenance schedule for {turbine}")
-        maintenance_schedule = predict_maintenance_schedule()
+        print(f"🔧 Getting LSTM maintenance schedule for {turbine}")
+        
+        # Use LSTM model to predict maintenance schedule
+        maintenance_schedule = get_lstm_maintenance_schedule(turbine)
+        
+        print(f"✅ LSTM generated {len(maintenance_schedule)} maintenance items for {turbine}")
         
         return JSONResponse(
             content=maintenance_schedule,
@@ -1068,7 +1151,7 @@ async def get_maintenance_schedule(turbine: str = "Turbine-1"):
         )
         
     except Exception as e:
-        print(f"API Error in maintenance schedule: {e}")
+        print(f"❌ Error in LSTM maintenance schedule: {e}")
         # Return fallback schedule
         current_date = datetime.now()
         fallback_schedule = [
@@ -1171,6 +1254,136 @@ async def get_system_status_endpoint():
 async def test_endpoint():
     """Test endpoint to verify server is working"""
     return {"message": "Test endpoint working", "timestamp": datetime.now().isoformat()}
+
+@app.get("/api/sensor-data/{turbine_id}")
+async def get_sensor_data(turbine_id: str):
+    """Get current sensor data for a specific turbine"""
+    try:
+        sensor_data = generate_dynamic_sensor_data(turbine_id)
+        return JSONResponse(
+            content=sensor_data,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
+    except Exception as e:
+        print(f"Error generating sensor data for {turbine_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error generating sensor data: {str(e)}")
+
+def send_maintenance_email(to_email: str, technician: str, components: List[str], turbine_id: str):
+    """Send maintenance email to technician"""
+    try:
+        # Email configuration (you can modify these settings)
+        smtp_server = "smtp.gmail.com"  # Using Gmail SMTP
+        smtp_port = 587
+        sender_email = "v.dhanushikan@gmail.com"  # Your Gmail address
+        sender_password = "meoe oveq hais uibu"   # Your Gmail app password
+        
+        # Alternative SMTP servers to try if Office 365 doesn't work:
+        # smtp_server = "smtp.gmail.com"  # For Gmail
+        # smtp_server = "smtp-mail.outlook.com"  # For Outlook
+        # smtp_server = "smtp.office365.com"  # For Office 365
+        
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = to_email
+        msg['Subject'] = f"Maintenance Assignment - {turbine_id}"
+        
+        # Email body template
+        body = f"""Hi {technician},
+
+Hope you're doing well.
+
+We've identified some issues in the turbine monitoring system that require your attention. Please review and carry out maintenance on the following components:
+
+{chr(10).join([f"- {component}" for component in components])}
+
+Turbine ID: {turbine_id}
+
+If needed, I can share the recent health status reports and sensor logs.
+
+Please confirm once you've scheduled or completed the maintenance.
+
+Best regards,
+Admin"""
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        # Send email
+        print(f"Attempting to connect to {smtp_server}:{smtp_port}")
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        print("SMTP connection established")
+        
+        print("Starting TLS encryption...")
+        server.starttls()
+        print("TLS started successfully")
+        
+        print(f"Attempting to login with {sender_email}")
+        server.login(sender_email, sender_password)
+        print("Login successful")
+        
+        text = msg.as_string()
+        print(f"Sending email to {to_email}")
+        server.sendmail(sender_email, to_email, text)
+        print("Email sent successfully")
+        
+        server.quit()
+        print(f"Email sent successfully to {technician} at {to_email}")
+        return True
+        
+    except Exception as e:
+        import traceback
+        print(f"Error sending email to {to_email}: {e}")
+        print(f"Full error details: {traceback.format_exc()}")
+        return False
+
+@app.post("/send-maintenance-email")
+async def send_maintenance_email_endpoint(request: MaintenanceEmailRequest):
+    """Send maintenance email to assigned technician"""
+    try:
+        # Send email
+        success = send_maintenance_email(
+            to_email=request.to,
+            technician=request.technician,
+            components=request.components,
+            turbine_id=request.turbineId
+        )
+        
+        if success:
+            # Add to email history
+            email_record = {
+                "id": len(email_history) + 1,
+                "timestamp": datetime.now().isoformat(),
+                "to": request.to,
+                "technician": request.technician,
+                "components": request.components,
+                "turbine_id": request.turbineId,
+                "status": "sent"
+            }
+            email_history.append(email_record)
+            
+            return {"message": "Email sent successfully", "status": "success"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to send email")
+            
+    except Exception as e:
+        print(f"Error in email endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Error sending email: {str(e)}")
+
+@app.get("/email-history")
+async def get_email_history():
+    """Get email history"""
+    return {"emails": email_history}
+
+@app.delete("/email-history")
+async def clear_email_history():
+    """Clear email history"""
+    global email_history
+    email_history.clear()
+    return {"message": "Email history cleared successfully"}
 
 if __name__ == "__main__":
     import uvicorn

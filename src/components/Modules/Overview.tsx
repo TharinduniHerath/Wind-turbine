@@ -4,7 +4,6 @@ import { useTurbineStore } from '../../store/turbineStore';
 import KPICard from '../Common/KPICard';
 import AlertPanel from '../Common/AlertPanel';
 import TimeSeriesChart from '../Charts/TimeSeriesChart';
-import TurbineSimulation from '../Simulation/TurbineSimulation';
 
 const Overview: React.FC = () => {
   const { kpis, powerHistory } = useTurbineStore();
@@ -26,15 +25,9 @@ const Overview: React.FC = () => {
         ))}
       </div>
 
-      {/* Main Content Grid */}
+      {/* Alerts Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 3D Simulation */}
-        <div className="lg:col-span-1">
-          <TurbineSimulation />
-        </div>
-
-        {/* Alerts Panel */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-2">
           <AlertPanel />
         </div>
       </div>

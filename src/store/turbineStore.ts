@@ -12,19 +12,10 @@ interface TurbineStore {
   
   // Historical data
   powerHistory: ChartDataPoint[];
-  noiseHistory: ChartDataPoint[];
   weatherHistory: ChartDataPoint[];
   
   // KPIs
   kpis: KPI[];
-  
-  // 3D simulation state
-  simulationActive: boolean;
-  turbineAnimation: {
-    rotorSpeed: number;
-    yaw: number;
-    pitch: number;
-  };
   
   // Actions
   setActiveModule: (module: ActiveModule) => void;
@@ -34,8 +25,6 @@ interface TurbineStore {
   removeAlert: (alertId: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  toggleSimulation: () => void;
-  updateAnimation: (animation: Partial<TurbineStore['turbineAnimation']>) => void;
   initializeData: () => void;
 }
 
@@ -48,15 +37,8 @@ export const useTurbineStore = create<TurbineStore>((set, get) => ({
   isLoading: false,
   error: null,
   powerHistory: [],
-  noiseHistory: [],
   weatherHistory: [],
   kpis: [],
-  simulationActive: false,
-  turbineAnimation: {
-    rotorSpeed: 0,
-    yaw: 0,
-    pitch: 0,
-  },
   
   // Actions
   setActiveModule: (module) => set({ activeModule: module }),
@@ -68,13 +50,11 @@ export const useTurbineStore = create<TurbineStore>((set, get) => ({
     // Update historical data
     const timestamp = data.timestamp;
     const newPowerPoint = { timestamp, value: data.powerOutput };
-    const newNoisePoint = { timestamp, value: data.noise.level };
     const newWeatherPoint = { timestamp, value: data.windSpeed };
     
     // Keep last 50 data points
     const maxPoints = 50;
     const powerHistory = [...state.powerHistory, newPowerPoint].slice(-maxPoints);
-    const noiseHistory = [...state.noiseHistory, newNoisePoint].slice(-maxPoints);
     const weatherHistory = [...state.weatherHistory, newWeatherPoint].slice(-maxPoints);
     
     // Update KPIs
@@ -106,31 +86,15 @@ export const useTurbineStore = create<TurbineStore>((set, get) => ({
         trend: 'stable',
         icon: 'RotateCw'
       },
-      {
-        id: 'noise',
-        label: 'Noise Level',
-        value: data.noise.level,
-        unit: 'dB',
-        status: data.noise.level < 45 ? 'normal' : data.noise.level < 50 ? 'warning' : 'critical',
-        trend: 'stable',
-        icon: 'Volume2'
-      }
+
     ];
-    
-    // Update animation based on data
-    const turbineAnimation = {
-      rotorSpeed: data.rotorRpm,
-      yaw: data.nacelle.yaw,
-      pitch: data.blades.pitch,
-    };
     
     set({
       currentData: data,
       powerHistory,
-      noiseHistory,
+
       weatherHistory,
       kpis,
-      turbineAnimation,
     });
   },
   
@@ -144,10 +108,6 @@ export const useTurbineStore = create<TurbineStore>((set, get) => ({
   
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
-  toggleSimulation: () => set((state) => ({ simulationActive: !state.simulationActive })),
-  updateAnimation: (animation) => set((state) => ({
-    turbineAnimation: { ...state.turbineAnimation, ...animation }
-  })),
   
   initializeData: () => {
     // Generate initial mock data
@@ -164,10 +124,7 @@ export const useTurbineStore = create<TurbineStore>((set, get) => ({
         pitch: 3.2,
         vibration: 0.8,
       },
-      noise: {
-        level: 42.3,
-        frequency: 125,
-      },
+      
       weather: {
         temperature: 18,
         humidity: 62,

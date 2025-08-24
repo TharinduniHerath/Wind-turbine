@@ -2,22 +2,18 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Home, 
-  Volume2, 
   Zap, 
   CloudRain, 
-  Settings,
-  Play,
-  Pause
+  Settings
 } from 'lucide-react';
 import { useTurbineStore } from '../../store/turbineStore';
 import { ActiveModule } from '../../types';
 
 const Sidebar: React.FC = () => {
-  const { activeModule, setActiveModule, simulationActive, toggleSimulation } = useTurbineStore();
+  const { activeModule, setActiveModule } = useTurbineStore();
 
   const navigationItems = [
     { id: 'overview' as ActiveModule, label: 'Overview', icon: Home },
-    { id: 'noise' as ActiveModule, label: 'Noise Monitor', icon: Volume2 },
     { id: 'power' as ActiveModule, label: 'Power Optimize', icon: Zap },
     { id: 'weather' as ActiveModule, label: 'Weather Impact', icon: CloudRain },
     { id: 'maintenance' as ActiveModule, label: 'Maintenance', icon: Settings },
@@ -35,7 +31,10 @@ const Sidebar: React.FC = () => {
             return (
               <motion.button
                 key={item.id}
-                onClick={() => setActiveModule(item.id)}
+                onClick={() => {
+                  console.log('🔧 Sidebar navigation clicked:', item.id);
+                  setActiveModule(item.id);
+                }}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                   isActive
                     ? 'bg-sky-600 text-white shadow-lg'
@@ -51,36 +50,6 @@ const Sidebar: React.FC = () => {
           })}
         </div>
       </nav>
-      
-      {/* Simulation Control */}
-      <div className="p-4 border-t border-slate-700">
-        <div className="bg-slate-900 rounded-lg p-4">
-          <h3 className="text-white font-semibold mb-3">3D Simulation</h3>
-          <button
-            onClick={toggleSimulation}
-            className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-              simulationActive
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
-          >
-            {simulationActive ? (
-              <>
-                <Pause className="w-4 h-4" />
-                <span>Stop Simulation</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                <span>Start Simulation</span>
-              </>
-            )}
-          </button>
-          <div className="mt-2 text-xs text-slate-400 text-center">
-            {simulationActive ? 'Simulation Running' : 'Simulation Stopped'}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

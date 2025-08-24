@@ -39,14 +39,14 @@ const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ component, data, inde
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-400';
-    if (score >= 80) return 'text-amber-400';
+    if (score >= 81) return 'text-green-400';
+    if (score >= 70) return 'text-amber-400';
     return 'text-red-400';
   };
 
   const getProgressColor = (score: number) => {
-    if (score >= 90) return 'bg-green-400';
-    if (score >= 80) return 'bg-amber-400';
+    if (score >= 81) return 'bg-green-400';
+    if (score >= 70) return 'bg-amber-400';
     return 'bg-red-400';
   };
 
@@ -91,9 +91,9 @@ const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ component, data, inde
         </div>
         
         <div className="text-xs text-slate-500">
-          {score >= 90 ? 'Excellent condition' :
-           score >= 80 ? 'Good condition' :
-           score >= 70 ? 'Fair condition' : 'Poor condition'}
+          {score >= 81 ? 'Excellent condition' :
+           score >= 70 ? 'Good condition' :
+           'Poor condition'}
         </div>
       </div>
     </motion.div>

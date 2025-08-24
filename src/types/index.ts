@@ -11,10 +11,7 @@ export interface TurbineData {
     pitch: number;
     vibration: number;
   };
-  noise: {
-    level: number;
-    frequency: number;
-  };
+
   weather: {
     temperature: number;
     humidity: number;
@@ -40,7 +37,7 @@ export interface Alert {
   type: 'warning' | 'error' | 'info';
   message: string;
   timestamp: string;
-  module: 'noise' | 'power' | 'weather' | 'maintenance';
+  module: 'power' | 'weather' | 'maintenance';
 }
 
 export interface KPI {
@@ -59,4 +56,4 @@ export interface ChartDataPoint {
   predicted?: number;
 }
 
-export type ActiveModule = 'overview' | 'noise' | 'power' | 'weather' | 'maintenance';
+export type ActiveModule = 'overview' | 'power' | 'weather' | 'maintenance';
