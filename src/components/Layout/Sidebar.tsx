@@ -53,35 +53,12 @@ const Sidebar: React.FC = () => {
       </nav>
       
       {/* Simulation Control */}
-      <div className="p-4 border-t border-slate-700">
-        <div className="bg-slate-900 rounded-lg p-4">
-          <h3 className="text-white font-semibold mb-3">3D Simulation</h3>
-          <button
-            onClick={toggleSimulation}
-            className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-              simulationActive
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
-          >
-            {simulationActive ? (
-              <>
-                <Pause className="w-4 h-4" />
-                <span>Stop Simulation</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                <span>Start Simulation</span>
-              </>
-            )}
-          </button>
-          <div className="mt-2 text-xs text-slate-400 text-center">
-            {simulationActive ? 'Simulation Running' : 'Simulation Stopped'}
-          </div>
+    
+        
+         
         </div>
-      </div>
-    </div>
+      
+    
   );
 };
 

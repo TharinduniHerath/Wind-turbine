@@ -1,0 +1,154 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import TurbineModel from "../Turbine3DModelV2/WindTurbine"; // Adjust path as needed
+import { useTurbineStore } from "../../store/turbineStore"; // import your store hook
+
+interface PredictionResult {
+  best_pitch_angle: number;
+  predicted_noise: number;
+  predicted_rpm: number;
+  predicted_power: number;
+}
+
+const PredictionPage: React.FC = () => {
+  const [windSpeed, setWindSpeed] = useState("");
+  const [windDirection, setWindDirection] = useState("");
+  const [targetNoiseLevel, setTargetNoiseLevel] = useState("35");
+  const [prediction, setPrediction] = useState<PredictionResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Get setActiveModule from the global store to change active module
+  const setActiveModule = useTurbineStore(state => state.setActiveModule);
+
+  const handlePredict = async () => {
+    setError("");
+    setPrediction(null);
+
+    if (!windSpeed || !windDirection || !targetNoiseLevel) {
+      setError("Wind speed, wind direction, and target noise level are required.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("http://localhost:8000/predict", {
+        wind_speed: parseFloat(windSpeed),
+        wind_direction: parseFloat(windDirection),
+        target_noise_level: parseFloat(targetNoiseLevel),
+      });
+
+      setPrediction(response.data);
+    } catch (err) {
+      console.error("Prediction error:", err);
+      setError("Prediction failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-6 bg-slate-900 text-white min-h-screen">
+      {/* Header with title and Live button */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Predict Noise & Turbine Behavior</h1>
+        <button
+          onClick={() => setActiveModule('noise')}
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow"
+          type="button"
+        >
+          Live
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+        <div>
+          <label className="block mb-1 font-medium">Wind Speed (m/s)</label>
+          <input
+            type="number"
+            value={windSpeed}
+            onChange={(e) => setWindSpeed(e.target.value)}
+            className="w-full p-2 rounded bg-white text-black"
+            placeholder="Enter wind speed"
+          />
+        </div>
+        <div>
+          <label className="block mb-1 font-medium">Wind Direction (°)</label>
+          <input
+            type="number"
+            value={windDirection}
+            onChange={(e) => setWindDirection(e.target.value)}
+            className="w-full p-2 rounded bg-white text-black"
+            placeholder="Enter wind direction"
+          />
+        </div>
+        <div>
+          <label className="block mb-1 font-medium">Target Noise Level (dB)</label>
+          <input
+            type="number"
+            value={targetNoiseLevel}
+            onChange={(e) => setTargetNoiseLevel(e.target.value)}
+            className="w-full p-2 rounded bg-white text-black"
+            placeholder="e.g. 35"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="text-red-400 mb-4">⚠️ {error}</div>
+      )}
+
+      <button
+        onClick={handlePredict}
+        className={`px-6 py-2 rounded font-semibold transition ${
+          loading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
+        }`}
+        disabled={loading}
+      >
+        {loading ? "Predicting..." : "Predict"}
+      </button>
+
+      {prediction && (
+        <>
+          <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Prediction Results</h2>
+            <ul className="space-y-2">
+              <li>
+                <span className="font-semibold">Noise Level:</span> {prediction.predicted_noise.toFixed(2)} dB
+              </li>
+              <li>
+                <span className="font-semibold">Rotor Speed:</span> {prediction.predicted_rpm.toFixed(2)} RPM
+              </li>
+              <li>
+                <span className="font-semibold">Pitch Angle:</span> {prediction.best_pitch_angle.toFixed(2)}°
+              </li>
+              <li>
+                <span className="font-semibold">Power Output:</span> {prediction.predicted_power.toFixed(2)} kW
+              </li>
+            </ul>
+          </div>
+
+          <div className="mt-8 h-[500px] border rounded bg-gray-900">
+            <Canvas camera={{ position: [0, 8, 20], fov: 45 }}>
+              <ambientLight intensity={0.5} />
+              <directionalLight position={[5, 5, 5]} />
+              <TurbineModel
+                rpm={prediction.predicted_rpm}
+                pitch={prediction.best_pitch_angle}
+                 windDirection={parseFloat(windDirection)}
+                 position={[0, -5, 0]}
+                 scale={[0.5, 0.5, 0.5]}
+              />
+              <OrbitControls />
+            </Canvas>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default PredictionPage;

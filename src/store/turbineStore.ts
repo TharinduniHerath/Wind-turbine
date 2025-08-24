@@ -161,7 +161,7 @@ export const useTurbineStore = create<TurbineStore>((set, get) => ({
         vibration: 0.8,
       },
       noise: {
-        level: 42.3,
+        level: 40.3,
         frequency: 125,
       },
       weather: {

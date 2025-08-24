@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, Settings, Power, AlertTriangle } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTurbineStore } from '../../store/turbineStore';
 
@@ -25,7 +25,7 @@ const Header: React.FC = () => {
             <p className="text-sm text-slate-400">Digital Twin Monitoring System</p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           {/* Connection Status */}
           <div className="flex items-center space-x-2">
@@ -34,26 +34,9 @@ const Header: React.FC = () => {
               {isOnline ? 'Connected' : 'Offline'}
             </span>
           </div>
-          
-          {/* Alerts */}
-          <div className="relative">
-            <button className="p-2 text-slate-400 hover:text-white transition-colors">
-              <Bell className="w-5 h-5" />
-              {activeAlerts > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {activeAlerts}
-                </span>
-              )}
-            </button>
-          </div>
-          
-          {/* Settings */}
-          <button className="p-2 text-slate-400 hover:text-white transition-colors">
-            <Settings className="w-5 h-5" />
-          </button>
         </div>
       </div>
-      
+
       {/* System Status Bar */}
       <div className="mt-4 flex items-center justify-between text-sm">
         <div className="flex items-center space-x-6">
@@ -64,13 +47,6 @@ const Header: React.FC = () => {
             Last Update: <span className="text-white">{currentData ? new Date(currentData.timestamp).toLocaleTimeString() : 'N/A'}</span>
           </div>
         </div>
-        
-        {alerts.length > 0 && (
-          <div className="flex items-center space-x-2 text-amber-400">
-            <AlertTriangle className="w-4 h-4" />
-            <span>{alerts.length} Active Alert{alerts.length > 1 ? 's' : ''}</span>
-          </div>
-        )}
       </div>
     </header>
   );
