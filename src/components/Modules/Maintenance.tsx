@@ -264,10 +264,18 @@ const Maintenance: React.FC = () => {
             const healthData = await healthResponse.json();
             const maintenance = await maintenanceResponse.json();
             
+            // Ensure no pre-assigned technicians from API data
+            const processedMaintenance = maintenance.map((item: any) => ({
+              ...item,
+              assignedTechnician: undefined
+            }));
+            
+            console.log(`🔧 Processed maintenance data for ${turbineId}:`, processedMaintenance.map(item => ({ component: item.component, assignedTechnician: item.assignedTechnician })));
+            
             newAllTurbinesData[turbineId] = {
               predictions,
               healthScores: healthData.health_scores || healthData,
-              maintenanceSchedule: maintenance
+              maintenanceSchedule: processedMaintenance
             };
           }
         } catch (err) {
@@ -283,7 +291,13 @@ const Maintenance: React.FC = () => {
       if (newAllTurbinesData[selectedTurbine]) {
         setPredictions(newAllTurbinesData[selectedTurbine].predictions);
         setHealthScores(newAllTurbinesData[selectedTurbine].healthScores);
-        setMaintenanceSchedule(newAllTurbinesData[selectedTurbine].maintenanceSchedule);
+        // Ensure no pre-assigned technicians from API data
+        const processedMaintenance = newAllTurbinesData[selectedTurbine].maintenanceSchedule.map((item: any) => ({
+          ...item,
+          assignedTechnician: undefined
+        }));
+        console.log(`🔧 Setting maintenance schedule for ${selectedTurbine}:`, processedMaintenance.map(item => ({ component: item.component, assignedTechnician: item.assignedTechnician })));
+        setMaintenanceSchedule(processedMaintenance);
       }
       
     } catch (err) {
@@ -449,7 +463,12 @@ const Maintenance: React.FC = () => {
       }
       
       const data = await response.json();
-      setMaintenanceSchedule(data);
+      // Ensure no pre-assigned technicians - all should start with "Select Technician"
+      const processedData = data.map((item: any) => ({
+        ...item,
+        assignedTechnician: undefined // Remove any pre-assigned technicians
+      }));
+      setMaintenanceSchedule(processedData);
     } catch (err) {
       console.error('Error fetching maintenance schedule:', err);
       
@@ -464,8 +483,7 @@ const Maintenance: React.FC = () => {
             next_service: new Date(currentDate.getTime() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             duration: '2 hours',
             priority: 'Low',
-            status: 'Scheduled',
-            assignedTechnician: 'Technician-1'
+            status: 'Scheduled'
           },
           {
             component: 'Blade Inspection',
@@ -474,8 +492,7 @@ const Maintenance: React.FC = () => {
             next_service: new Date(currentDate.getTime() + 135 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             duration: '4 hours',
             priority: 'Low',
-            status: 'Scheduled',
-            assignedTechnician: 'Technician-2'
+            status: 'Scheduled'
           },
           {
             component: 'Generator Bearing',
@@ -584,7 +601,12 @@ const Maintenance: React.FC = () => {
       if (allTurbinesData[selectedTurbine]) {
         setPredictions(allTurbinesData[selectedTurbine].predictions);
         setHealthScores(allTurbinesData[selectedTurbine].healthScores);
-        setMaintenanceSchedule(allTurbinesData[selectedTurbine].maintenanceSchedule);
+        // Ensure no pre-assigned technicians from API data
+        const processedMaintenance = allTurbinesData[selectedTurbine].maintenanceSchedule.map((item: any) => ({
+          ...item,
+          assignedTechnician: undefined
+        }));
+        setMaintenanceSchedule(processedMaintenance);
       }
     } catch (error) {
       console.error('🔧 Error in selectedTurbine useEffect:', error);
