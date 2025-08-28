@@ -100,8 +100,10 @@ const Maintenance: React.FC = () => {
 
   // Handle technician assignment
   const handleTechnicianAssignment = (component: string, technician: string) => {
-    setPendingAssignment({ component, technician });
-    setShowConfirmation(true);
+    if (technician && technician !== '') {
+      setPendingAssignment({ component, technician });
+      setShowConfirmation(true);
+    }
   };
 
   // Confirm technician assignment
@@ -116,6 +118,30 @@ const Maintenance: React.FC = () => {
       );
       setShowConfirmation(false);
       setPendingAssignment(null);
+      
+      // Show success notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300';
+      notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>Technician assigned successfully!</span>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      // Remove notification after 3 seconds
+      setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      }, 3000);
     }
   };
 
@@ -1053,15 +1079,23 @@ const Maintenance: React.FC = () => {
                         <td className="p-3 text-slate-300">{item.duration}</td>
                         <td className="p-3 text-slate-300">{item.message}</td>
                         <td className="p-3">
-                          <select
-                            value={item.assignedTechnician || ''}
-                            onChange={(e) => handleTechnicianAssignment(item.component, e.target.value)}
-                            className="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                          >
-                            <option value="">Select Technician</option>
-                            <option value="Technician-1">Technician-1</option>
-                            <option value="Technician-2">Technician-2</option>
-                          </select>
+                          <div className="relative">
+                            <select
+                              value={item.assignedTechnician || ''}
+                              onChange={(e) => handleTechnicianAssignment(item.component, e.target.value)}
+                              className="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:border-transparent w-full pr-8 cursor-pointer hover:border-sky-500/50 transition-colors"
+                            >
+                              <option value="">Select Technician</option>
+                              <option value="Technician-1">Technician-1</option>
+                              <option value="Technician-2">Technician-2</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
+
                         </td>
                       </tr>
                     ))}
@@ -1100,76 +1134,101 @@ const Maintenance: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Confirmation Popup Modal */}
+      {/* Enhanced Confirmation Popup Modal */}
       {showConfirmation && pendingAssignment && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={cancelAssignment}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-slate-800 rounded-xl border border-slate-700 max-w-md w-full mx-4"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="bg-slate-800 rounded-2xl border border-slate-600 shadow-2xl max-w-md w-full mx-4 transform"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Confirmation Header */}
-            <div className="p-6 border-b border-slate-700">
-              <h3 className="text-xl font-bold text-white">Confirm Assignment</h3>
-              <p className="text-slate-400 text-sm mt-1">
-                Assign technician to maintenance task
-              </p>
-            </div>
-
-            {/* Confirmation Content */}
-            <div className="p-6">
-              <div className="space-y-4">
-                <div className="bg-slate-700/30 rounded-lg p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-sky-400/20 rounded-lg flex items-center justify-center">
-                      <Wrench className="w-5 h-5 text-sky-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">{pendingAssignment.component}</p>
-                      <p className="text-slate-400 text-sm">Component</p>
-                    </div>
-                  </div>
+            {/* Enhanced Confirmation Header */}
+            <div className="p-6 border-b border-slate-700 bg-gradient-to-r from-slate-800 to-slate-700 rounded-t-2xl">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-sky-400/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-
-                <div className="bg-slate-700/30 rounded-lg p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-green-400/20 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">{pendingAssignment.technician}</p>
-                      <p className="text-slate-400 text-sm">Assigned Technician</p>
-                    </div>
-                  </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Confirm Technician Assignment</h3>
+                  <p className="text-slate-400 text-sm mt-1">
+                    Please confirm the maintenance task assignment
+                  </p>
                 </div>
-
-                <p className="text-slate-300 text-sm text-center">
-                  Are you sure you want to assign <span className="text-white font-medium">{pendingAssignment.technician}</span> to the <span className="text-white font-medium">{pendingAssignment.component}</span> maintenance task?
-                </p>
               </div>
             </div>
 
-            {/* Confirmation Actions */}
-            <div className="p-6 border-t border-slate-700 flex space-x-3">
+            {/* Enhanced Confirmation Content */}
+            <div className="p-6">
+              <div className="space-y-4">
+                {/* Component Information */}
+                <div className="bg-gradient-to-r from-slate-700/50 to-slate-600/50 rounded-xl p-4 border border-slate-600/50">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-sky-400/20 rounded-xl flex items-center justify-center">
+                      <Wrench className="w-6 h-6 text-sky-400" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-semibold text-lg">{pendingAssignment.component}</p>
+                      <p className="text-slate-400 text-sm">Maintenance Component</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technician Information */}
+                <div className="bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-xl p-4 border border-green-400/20">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-green-400/20 rounded-xl flex items-center justify-center">
+                      <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-semibold text-lg">{pendingAssignment.technician}</p>
+                      <p className="text-green-400 text-sm font-medium">Selected Technician</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Confirmation Message */}
+                <div className="bg-blue-400/10 border border-blue-400/20 rounded-xl p-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-blue-400/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-blue-400 font-medium text-sm">Assignment Confirmation</p>
+                      <p className="text-slate-300 text-sm mt-1">
+                        Are you sure you want to assign <span className="text-white font-semibold">{pendingAssignment.technician}</span> to the <span className="text-white font-semibold">{pendingAssignment.component}</span> maintenance task?
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Confirmation Actions */}
+            <div className="p-6 border-t border-slate-700 bg-slate-700/30 rounded-b-2xl flex space-x-3">
               <button
                 onClick={cancelAssignment}
-                className="flex-1 px-4 py-2 text-slate-300 border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors"
+                className="flex-1 px-6 py-3 text-slate-300 border border-slate-600 rounded-xl hover:bg-slate-700 hover:border-slate-500 transition-all duration-200 font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmAssignment}
-                className="flex-1 px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Confirm Assignment
               </button>
