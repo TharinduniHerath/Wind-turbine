@@ -28,7 +28,7 @@ def stream_real_data_from_csv(file_path):
         time.sleep(30)
 
 if __name__ == "__main__":
-    csv_path = r"../data/wind_data.csv"
+    csv_path = r"../noiseData/wind_data.csv"
 
     try:
         for data_point in stream_real_data_from_csv(csv_path):

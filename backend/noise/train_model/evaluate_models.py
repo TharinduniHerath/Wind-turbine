@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # Load data
-file_path = os.path.join("..", "data", "wind_data.csv")
+file_path = os.path.join("..", "noiseData", "wind_data.csv")
 df = pd.read_csv(file_path)
 df = df[['WindSpeed at 80m', 'Wind Direction', 'noise level', 'Rotor Speed', 'pitch angle','power out']]
 df.dropna(inplace=True)

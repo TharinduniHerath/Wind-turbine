@@ -35,7 +35,7 @@ const PredictionPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:8000/predict", {
+      const response = await axios.post("http://localhost:8000/noise/predict", {
         wind_speed: parseFloat(windSpeed),
         wind_direction: parseFloat(windDirection),
         target_noise_level: parseFloat(targetNoiseLevel),

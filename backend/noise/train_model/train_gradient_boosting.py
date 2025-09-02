@@ -6,7 +6,7 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error
 
 # Load dataset
-file_path = os.path.join("..", "data", "wind_data.csv")
+file_path = os.path.join("..", "noiseData", "wind_data.csv")
 df = pd.read_csv(file_path)
 df = df[['WindSpeed at 80m', 'Wind Direction', 'noise level', 'Rotor Speed', 'pitch angle','power out']]
 df.dropna(inplace=True)

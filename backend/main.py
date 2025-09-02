@@ -1,5 +1,4 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException,APIRouter
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import pandas as pd
@@ -11,7 +10,14 @@ from datetime import datetime, timedelta
 import json
 import random
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from noise.mainNoise import router as noise_router
+from noise.simulator.websocket_manager import WebSocketManager
 
+
+router = APIRouter()
+csv_path = "noise/noiseData/wind_data.csv"  # adjust relative path from backend/
+manager = WebSocketManager(csv_path=csv_path, delay=30)
 app = FastAPI(
     title="Wind Turbine ML API",
     description="API for wind turbine failure prediction and maintenance analytics",
@@ -628,6 +634,14 @@ async def get_analytics_summary():
             "availability": 0.98
         }
     }
+
+
+    
+
+
+#####################################NOISE BACKEND ############################
+
+app.include_router(noise_router, prefix="/noise")
 
 if __name__ == "__main__":
     import uvicorn

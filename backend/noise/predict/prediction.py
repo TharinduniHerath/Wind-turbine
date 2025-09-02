@@ -2,9 +2,13 @@ import os
 import numpy as np
 import joblib
 
-# Load your trained xgboost model (multi-output regressor)
-model_path = os.path.abspath(os.path.join("train_model", "wind_predictor_xgboost.pkl"))
+# BASE_DIR -> backend/noise folder
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # goes from predict/ to noise/
+model_path = os.path.join(BASE_DIR, "train_model", "wind_predictor_xgboost.pkl")
+
+# Load the model
 model = joblib.load(model_path)
+
 
 # Define realistic limits based on your turbine specs
 MAX_WIND_SPEED = 25.0      # max wind speed (m/s)
