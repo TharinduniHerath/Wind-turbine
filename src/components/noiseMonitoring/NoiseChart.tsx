@@ -1,4 +1,4 @@
-// src/components/noiseMonitoring/NoiseChart.tsx
+// NoiseChart.tsx
 import React from "react";
 import {
   LineChart,
@@ -10,35 +10,41 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-interface Props {
+interface NoiseChartProps {
   data: { timestamp: number; noise_level: number }[];
 }
 
-const NoiseChart: React.FC<Props> = ({ data }) => {
-  const formattedData = data.map((d) => ({
-    ...d,
-    time: new Date(d.timestamp * 1000).toLocaleTimeString(),
-  }));
-
+const NoiseChart: React.FC<NoiseChartProps> = ({ data }) => {
   return (
-    <div className="p-4 bg-white rounded-2xl shadow-md w-full">
-      <h2 className="text-xl font-semibold mb-2">Noise Level Over Time</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={formattedData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" />
-          <YAxis label={{ value: "dB", angle: -90, position: "insideLeft" }} />
-          <Tooltip />
-          <Line
-            type="monotone"
-            dataKey="noise_level"
-            stroke="#FF4136"
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="timestamp"
+          type="number"
+          domain={["dataMin", "dataMax"]}
+          scale="time"
+          tickFormatter={(tick) =>
+            new Date(tick).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })
+          }
+        />
+        <YAxis />
+        <Tooltip
+          labelFormatter={(label) =>
+            new Date(label).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })
+          }
+        />
+        <Line type="monotone" dataKey="noise_level" stroke="#8884d8" dot={false} />
+      </LineChart>
+    </ResponsiveContainer>
   );
 };
 

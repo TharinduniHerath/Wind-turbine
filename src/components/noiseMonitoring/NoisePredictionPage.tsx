@@ -55,13 +55,21 @@ const PredictionPage: React.FC = () => {
       {/* Header with title and Live button */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Predict Noise & Turbine Behavior</h1>
+          <div className="space-x-2">
         <button
           onClick={() => setActiveModule('noise')}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow"
           type="button"
         >
           Live
         </button>
+          <button
+            onClick={() => setActiveModule('futureNoisePrediction')}
+           className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow"
+          >
+            Predict 5-Day Noise
+          </button>
+          </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">

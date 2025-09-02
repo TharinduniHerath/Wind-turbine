@@ -10,6 +10,8 @@ import PowerOptimization from './components/Modules/PowerOptimization';
 import WeatherImpact from './components/Modules/WeatherImpact';
 import Maintenance from './components/Modules/Maintenance';
 import NoisePredictionPage from "./components/noiseMonitoring/NoisePredictionPage";
+import FutureNoisePrediction from "./components/noiseMonitoring/FuturePrediction";
+
 
 function App() {
   const { 
@@ -68,8 +70,10 @@ function App() {
         return <WeatherImpact />;
       case 'maintenance':
         return <Maintenance />;
-          case 'noisePrediction':   // <-- add this case
+          case 'noisePrediction':  
       return <NoisePredictionPage />;
+       case 'futureNoisePrediction':
+    return <FutureNoisePrediction />;
       
       default:
         return <Overview />;
