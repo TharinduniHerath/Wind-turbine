@@ -6,12 +6,11 @@ import TurbineModel from "../Turbine3DModelV2/WindTurbine"; // Adjust path as ne
 import { useTurbineStore } from "../../store/turbineStore"; // import your store hook
 
 interface PredictionResult {
-  best_pitch_angle: number;
-  predicted_noise: number;
-  predicted_rpm: number;
-  predicted_power: number;
+  pitch_angle: number;
+  noise_level: number;
+  rotor_speed: number;
+  power_out: number;
 }
-
 const PredictionPage: React.FC = () => {
   const [windSpeed, setWindSpeed] = useState("");
   const [windDirection, setWindDirection] = useState("");
@@ -124,18 +123,22 @@ const PredictionPage: React.FC = () => {
           <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Prediction Results</h2>
             <ul className="space-y-2">
-              <li>
-                <span className="font-semibold">Noise Level:</span> {prediction.predicted_noise.toFixed(2)} dB
-              </li>
-              <li>
-                <span className="font-semibold">Rotor Speed:</span> {prediction.predicted_rpm.toFixed(2)} RPM
-              </li>
-              <li>
-                <span className="font-semibold">Pitch Angle:</span> {prediction.best_pitch_angle.toFixed(2)}°
-              </li>
-              <li>
-                <span className="font-semibold">Power Output:</span> {prediction.predicted_power.toFixed(2)} kW
-              </li>
+            <li>
+  <span className="font-semibold">Noise Level:</span>{" "}
+  {prediction.noise_level !== undefined ? prediction.noise_level.toFixed(2) : "N/A"} dB
+</li>
+<li>
+  <span className="font-semibold">Rotor Speed:</span>{" "}
+  {prediction.rotor_speed !== undefined ? prediction.rotor_speed.toFixed(2) : "N/A"} RPM
+</li>
+<li>
+  <span className="font-semibold">Pitch Angle:</span>{" "}
+  {prediction.pitch_angle !== undefined ? prediction.pitch_angle.toFixed(2) : "N/A"}°
+</li>
+<li>
+  <span className="font-semibold">Power Output:</span>{" "}
+  {prediction.power_out !== undefined ? prediction.power_out.toFixed(2) : "N/A"} kW
+</li>
             </ul>
           </div>
 

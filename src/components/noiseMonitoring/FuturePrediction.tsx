@@ -20,8 +20,8 @@ const containerStyle = {
 };
 
 const defaultCenter = {
-  lat: 6.9271,
-  lng: 79.8612,
+  lat: 9.05028,
+  lng: 79.78694,
 };
 
 const FutureNoisePrediction: React.FC = () => {
