@@ -2,16 +2,23 @@
 import pandas as pd
 import numpy as np
 import joblib
+import os
 
-# --- Config ---
-MODEL_PATH = "../models/rf_model.pkl"  
+# --- Config ---  
+MODEL_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "models", "rf_model.pkl")
+)
+
 CUT_IN = 3.0
 RATED = 11.5
 CUT_OUT = 22.0
 RATED_POWER = 3450
 PITCH_MIN = 0
 PITCH_MAX = 70
-PITCH_STEP = 1.0
+PITCH_STEP = 5.0
+
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
 
 # --- Load model ---
 model = joblib.load(MODEL_PATH)
@@ -50,25 +57,25 @@ def recommend_pitch_with_noise(wind_speed: float, wind_dir: float, target_noise:
         pred = physics_guard(np.array([pred]), np.array([wind_speed]))[0]
 
         results.append({
-            "pitch angle": pitch,
-            "power out": pred[0],
-            "Rotor Speed": pred[1],
-            "noise level": pred[2]
+            "pitch_angle": pitch,
+            "power_out": pred[0],
+            "rotor_speed": pred[1],
+            "noise_level": pred[2]
         })
 
     # Filter results that are <= target noise
-    feasible = [r for r in results if r["noise level"] <= target_noise]
+    feasible = [r for r in results if r["noise_level"] <= target_noise]
 
     if feasible:
         # Sort feasible by closest to target noise, then max power
-        feasible.sort(key=lambda x: (target_noise - x["noise level"], -x["power out"]))
+        feasible.sort(key=lambda x: (target_noise - x["noise_level"], -x["power_out"]))
         best = feasible[0]
     else:
         # No feasible noise level → return max power anyway
-        results.sort(key=lambda x: -x["power out"])
+        results.sort(key=lambda x: -x["power_out"])
         best = results[0]
 
-    return pd.Series(best)
+    return best  # return plain dict, not pd.Series
 
 # --- Example usage ---
 if __name__ == "__main__":

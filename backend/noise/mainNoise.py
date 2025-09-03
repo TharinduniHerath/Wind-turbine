@@ -5,6 +5,7 @@ from noise.simulator.websocket_manager import WebSocketManager
 from noise.predict.prediction import predict_optimal_pitch_xgb
 from noise.weatherAPI.weatherPrediction import fetch_5day_forecast
 from noise.weatherAPI.weatherPredictionFuture import predict_future_weather 
+from noise.predict_V2.predict_V2 import recommend_pitch_with_noise
 
 router = APIRouter()
 
@@ -36,11 +37,12 @@ class PredictionRequest(BaseModel):
 
 @router.post("/predict")
 def predict(request: PredictionRequest):
-    return predict_optimal_pitch_xgb(
+    return recommend_pitch_with_noise(
         wind_speed=request.wind_speed,
-        wind_direction=request.wind_direction,
-        target_noise_level=request.target_noise_level
+        wind_dir=request.wind_direction,
+        target_noise=request.target_noise_level
     )
+    
 @router.get("/predict-future")
 def predict_future(lat: float, lon: float, target_noise: float = 35.0):
     """
