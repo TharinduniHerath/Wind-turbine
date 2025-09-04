@@ -119,45 +119,71 @@ const PredictionPage: React.FC = () => {
       </button>
 
       {prediction && (
-        <>
-          <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Prediction Results</h2>
-            <ul className="space-y-2">
-            <li>
-  <span className="font-semibold">Noise Level:</span>{" "}
-  {prediction.noise_level !== undefined ? prediction.noise_level.toFixed(2) : "N/A"} dB
-</li>
-<li>
-  <span className="font-semibold">Rotor Speed:</span>{" "}
-  {prediction.rotor_speed !== undefined ? prediction.rotor_speed.toFixed(2) : "N/A"} RPM
-</li>
-<li>
-  <span className="font-semibold">Pitch Angle:</span>{" "}
-  {prediction.pitch_angle !== undefined ? prediction.pitch_angle.toFixed(2) : "N/A"}°
-</li>
-<li>
-  <span className="font-semibold">Power Output:</span>{" "}
-  {prediction.power_out !== undefined ? prediction.power_out.toFixed(2) : "N/A"} kW
-</li>
-            </ul>
-          </div>
+  <>
+    <div className="mt-8">
+      <h2 className="text-xl font-semibold mb-4">Prediction Results</h2>
 
-          <div className="mt-8 h-[500px] border rounded bg-gray-900">
-            <Canvas camera={{ position: [0, 8, 20], fov: 45 }}>
-              <ambientLight intensity={0.5} />
-              <directionalLight position={[5, 5, 5]} />
-              <TurbineModel
-                rpm={prediction.predicted_rpm}
-                pitch={prediction.best_pitch_angle}
-                 windDirection={parseFloat(windDirection)}
-                 position={[0, -5, 0]}
-                 scale={[0.5, 0.5, 0.5]}
-              />
-              <OrbitControls />
-            </Canvas>
-          </div>
-        </>
-      )}
+      {/* Card-style grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <div className="bg-gray-800 p-4 rounded text-center">
+          <p className="text-gray-400">Noise Level</p>
+          <h2 className="text-white font-bold">
+            {prediction.noise_level !== undefined
+              ? prediction.noise_level.toFixed(2)
+              : "N/A"}{" "}
+            dB
+          </h2>
+        </div>
+
+        <div className="bg-gray-800 p-4 rounded text-center">
+          <p className="text-gray-400">Rotor Speed</p>
+          <h2 className="text-white font-bold">
+            {prediction.rotor_speed !== undefined
+              ? prediction.rotor_speed.toFixed(2)
+              : "N/A"}{" "}
+            RPM
+          </h2>
+        </div>
+
+        <div className="bg-gray-800 p-4 rounded text-center">
+          <p className="text-gray-400">Pitch Angle</p>
+          <h2 className="text-white font-bold">
+            {prediction.pitch_angle !== undefined
+              ? prediction.pitch_angle.toFixed(2)
+              : "N/A"}°
+          </h2>
+        </div>
+
+        <div className="bg-gray-800 p-4 rounded text-center">
+          <p className="text-gray-400">Power Output</p>
+          <h2 className="text-white font-bold">
+            {prediction.power_out !== undefined
+              ? prediction.power_out.toFixed(2)
+              : "N/A"}{" "}
+            kW
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    {/* Turbine canvas */}
+    <div className="mt-8 h-[500px] border rounded bg-gray-900">
+      <Canvas camera={{ position: [0, 8, 20], fov: 45 }}>
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[5, 5, 5]} />
+        <TurbineModel
+          rpm={prediction.predicted_rpm}
+          pitch={prediction.best_pitch_angle}
+          windDirection={parseFloat(windDirection)}
+          position={[0, -5, 0]}
+          scale={[0.5, 0.5, 0.5]}
+        />
+        <OrbitControls />
+      </Canvas>
+    </div>
+  </>
+)}
+
     </div>
   );
 };
