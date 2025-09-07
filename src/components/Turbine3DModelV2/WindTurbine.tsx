@@ -4,7 +4,7 @@ import WindmillTower from "./WindmillTower";
 import WindmillNacelle from "./WindmillNacelle";
 import WindmillRotor from "./WindmillRotor";
 
-export default function WindTurbine({ rpm, pitch, windDirection }) {
+export default function WindTurbine({ rpm, pitch, windDirection ,windSpeed}) {
   return (
     <group>
       {/* Tower positioned at origin */}
@@ -20,7 +20,7 @@ export default function WindTurbine({ rpm, pitch, windDirection }) {
         pitch={pitch}
       />
 
-     <WindmillNacelle position={[0, 12.5, -0.5]}  rpm={rpm}    windDirection={windDirection}showInternals={true} />
+     <WindmillNacelle position={[0, 12.5, -0.5]}  rpm={rpm}  windSpeed={windSpeed}  windDirection={windDirection}showInternals={true} />
 
     </group>
   );
