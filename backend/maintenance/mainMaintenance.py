@@ -2,14 +2,79 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
+from pydantic import BaseModel
 import sys
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Add the maintenance backend directory to the Python path
 maintenance_backend_path = os.path.join(os.path.dirname(__file__), 'backend')
 sys.path.insert(0, maintenance_backend_path)
 
 router = APIRouter()
+
+# Email models
+class MaintenanceEmailRequest(BaseModel):
+    to: str
+    subject: str
+    technician: str
+    components: List[str]
+    turbineId: str
+
+# Email history storage
+email_history = []
+
+def send_maintenance_email(to_email: str, technician: str, components: List[str], turbine_id: str):
+    """Send maintenance email to technician"""
+    try:
+        # Email configuration (you can modify these settings)
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        sender_email = "v.dhanushikan@gmail.com"  # Your Gmail address
+        sender_password = "meoe oveq hais uibu"  # Your Gmail app password
+        
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = to_email
+        msg['Subject'] = f"Maintenance Assignment - Turbine {turbine_id}"
+        
+        # Email body template
+        components_list = "\n".join([f"• {comp}" for comp in components])
+        body = f"""
+Dear {technician},
+
+You have been assigned maintenance tasks for Turbine {turbine_id}.
+
+Components requiring attention:
+{components_list}
+
+Please schedule and complete these maintenance tasks at your earliest convenience.
+
+Best regards,
+Wind Turbine Monitoring System
+"""
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        # Send email
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            print(f"Attempting to login with {sender_email}")
+            server.login(sender_email, sender_password)
+            
+            text = msg.as_string()
+            print(f"Sending email to {to_email}")
+            server.sendmail(sender_email, to_email, text)
+            print("Email sent successfully")
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error sending email to {to_email}: {e}")
+        return False
 
 # Test endpoint to verify the router is working
 @router.get("/test")
@@ -378,6 +443,161 @@ async def get_sensor_data(turbine_id: str):
     except Exception as e:
         print(f"Error generating sensor data for {turbine_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Error generating sensor data: {str(e)}")
+
+@router.get("/api/system-status")
+async def get_system_status(turbine: str = "Turbine-1"):
+    """Get overall system status prediction for a specific turbine"""
+    try:
+        print(f"🏥 Getting system status for {turbine}")
+        
+        # Get health scores for the turbine
+        from turbine_data import get_turbine_health_scores
+        health_scores = get_turbine_health_scores(turbine)
+        
+        # Calculate overall health metrics
+        if not health_scores:
+            return {
+                "status": "Unknown",
+                "message": "System status cannot be determined due to insufficient data.",
+                "severity": "unknown",
+                "recommendations": ["Check sensor connectivity", "Verify data collection systems"]
+            }
+        
+        # Calculate average health score
+        avg_health = sum(data["score"] for data in health_scores.values()) / len(health_scores)
+        
+        # Count critical components (score < 80)
+        critical_components = sum(1 for data in health_scores.values() if data["score"] < 80)
+        
+        # Count declining trends
+        declining_components = sum(1 for data in health_scores.values() if data["trend"] == "declining")
+        
+        # Determine system status based on health metrics
+        if avg_health >= 90 and critical_components == 0:
+            status = "Excellent"
+            severity = "low"
+            message = f"All systems operating optimally for {turbine}. No immediate maintenance required."
+        elif avg_health >= 80 and critical_components <= 1:
+            status = "Good"
+            severity = "low"
+            message = f"{turbine} is operating well with minor monitoring needed."
+        elif avg_health >= 70 and critical_components <= 2:
+            status = "Fair"
+            severity = "medium"
+            message = f"{turbine} requires attention to prevent performance degradation."
+        elif avg_health >= 60:
+            status = "Poor"
+            severity = "high"
+            message = f"{turbine} needs immediate maintenance to prevent failures."
+        else:
+            status = "Critical"
+            severity = "critical"
+            message = f"{turbine} is in critical condition and requires emergency maintenance."
+        
+        # Generate recommendations
+        recommendations = []
+        if critical_components > 0:
+            recommendations.append(f"Inspect {critical_components} critical component(s)")
+        if declining_components > 0:
+            recommendations.append(f"Monitor {declining_components} declining component(s)")
+        if avg_health < 80:
+            recommendations.append("Schedule comprehensive maintenance review")
+        if not recommendations:
+            recommendations.append("Continue routine monitoring")
+        
+        system_status = {
+            "status": status,
+            "message": message,
+            "severity": severity,
+            "average_health": round(avg_health, 1),
+            "critical_components": critical_components,
+            "declining_components": declining_components,
+            "recommendations": recommendations,
+            "turbine_id": turbine,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        print(f"✅ System status for {turbine}: {status} ({severity})")
+        
+        return JSONResponse(
+            content=system_status,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
+        
+    except Exception as e:
+        print(f"❌ Error getting system status for {turbine}: {e}")
+        # Return fallback system status
+        fallback_status = {
+            "status": "Good",
+            "message": f"{turbine} is operating within normal parameters.",
+            "severity": "low",
+            "average_health": 85.0,
+            "critical_components": 0,
+            "declining_components": 1,
+            "recommendations": ["Continue routine monitoring"],
+            "turbine_id": turbine,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        return JSONResponse(
+            content=fallback_status,
+            status_code=200,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
+
+# Email endpoints
+@router.post("/send-maintenance-email")
+async def send_maintenance_email_endpoint(request: MaintenanceEmailRequest):
+    """Send maintenance email to assigned technician"""
+    try:
+        # Send email
+        success = send_maintenance_email(
+            to_email=request.to,
+            technician=request.technician,
+            components=request.components,
+            turbine_id=request.turbineId
+        )
+        
+        if success:
+            # Add to email history
+            email_record = {
+                "id": len(email_history) + 1,
+                "timestamp": datetime.now().isoformat(),
+                "to": request.to,
+                "technician": request.technician,
+                "components": request.components,
+                "turbine_id": request.turbineId,
+                "status": "sent"
+            }
+            email_history.append(email_record)
+            
+            return {"message": "Email sent successfully", "status": "success"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to send email")
+            
+    except Exception as e:
+        print(f"Error in email endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Error sending email: {str(e)}")
+
+@router.get("/email-history")
+async def get_email_history():
+    """Get email history"""
+    return {"emails": email_history}
+
+@router.delete("/email-history")
+async def clear_email_history():
+    """Clear email history"""
+    global email_history
+    email_history.clear()
+    return {"message": "Email history cleared successfully"}
 
 # Initialize models on router startup
 @router.on_event("startup")

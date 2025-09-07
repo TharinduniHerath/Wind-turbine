@@ -6,6 +6,7 @@ import PredictiveAlert from './PredictiveAlert';
 import HealthScoreCard from './HealthScoreCard';
 import MaintenanceScheduleCard from './MaintenanceScheduleCard';
 import TurbineSelector from './TurbineSelector';
+import TurbineModel3D from './TurbineModel3D';
 
 
 
@@ -81,6 +82,7 @@ const Maintenance: React.FC = () => {
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [emailHistory, setEmailHistory] = useState<any[]>([]);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
+  const [show3DModal, setShow3DModal] = useState(false);
   
   // State for all turbines data
   const [allTurbinesData, setAllTurbinesData] = useState<{
@@ -684,6 +686,18 @@ const Maintenance: React.FC = () => {
     }
   }, [selectedTurbine]);
 
+  // ESC key handler for 3D modal
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && show3DModal) {
+        setShow3DModal(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [show3DModal]);
+
 
 
   try {
@@ -1060,6 +1074,17 @@ const Maintenance: React.FC = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">Last Update</span>
                   <span className="text-white">{new Date().toLocaleTimeString()}</span>
+                </div>
+              </div>
+              
+              {/* 3D Turbine Model - Integrated into System Overview */}
+              <div className="mt-6 pt-6 border-t border-slate-700">
+                <div 
+                  onClick={() => setShow3DModal(true)}
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
+                  title="Click to expand 3D model"
+                >
+                  <TurbineModel3D />
                 </div>
               </div>
             </div>
@@ -1489,6 +1514,78 @@ const Maintenance: React.FC = () => {
               >
                 Clear History
               </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* 3D Model Full-Screen Modal */}
+      {show3DModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={() => setShow3DModal(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-slate-800 rounded-2xl border border-slate-600 shadow-2xl max-w-6xl w-full mx-4 h-[90vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-700 bg-gradient-to-r from-slate-800 to-slate-700 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">3D Turbine Model - Detailed View</h2>
+                  <p className="text-slate-400 text-sm mt-1">
+                    Interactive 3D visualization of wind turbine components for {selectedTurbine}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShow3DModal(false)}
+                  className="p-3 text-slate-400 hover:text-white transition-colors rounded-xl hover:bg-slate-700/50"
+                  title="Close (ESC)"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content - Full Height 3D Model */}
+            <div className="relative flex-1 flex flex-col">
+              <div className="relative flex-1 bg-slate-900 overflow-hidden">
+                <div className="absolute top-4 right-4 z-10 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
+                  <p className="text-white text-sm">
+                    Drag to rotate • Scroll to zoom • Hover for component info
+                  </p>
+                </div>
+                
+                {/* Large 3D Model - Centered */}
+                <div className="w-full h-full">
+                  <TurbineModel3D isModal={true} />
+                </div>
+              </div>
+              
+              {/* Modal Footer - Compact */}
+              <div className="p-4 bg-slate-800/50 border-t border-slate-700 flex items-center justify-between">
+                <div className="text-slate-400 text-sm">
+                  <span className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span>Real-time 3D model • Last updated: {new Date().toLocaleTimeString()}</span>
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShow3DModal(false)}
+                  className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors font-medium text-sm"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>
