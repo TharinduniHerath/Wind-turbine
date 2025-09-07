@@ -2,7 +2,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from noise.mainNoise import router as noise_router
 from noise.simulator.websocket_manager import WebSocketManager
-from maintenance.mainMaintenance import router as maintenance_router
+from maintenance.main_maintenance import router as maintenance_router
 
 router = APIRouter()
 csv_path = "noise/noiseData/wind_data.csv"  # adjust relative path from backend/
@@ -38,10 +38,7 @@ async def root():
     }
 
 #####################################MAINTENANCE MODULE ############################
-# Include with prefix for organized access
 app.include_router(maintenance_router, prefix="/maintenance")
-# Also include without prefix for backward compatibility
-app.include_router(maintenance_router)
 
 #####################################NOISE BACKEND ############################
 app.include_router(noise_router, prefix="/noise")

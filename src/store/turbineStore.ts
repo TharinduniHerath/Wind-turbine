@@ -4,6 +4,7 @@ import { TurbineData, Alert, KPI, ActiveModule, ChartDataPoint } from '../types'
 interface TurbineStore {
   // Current state
   activeModule: ActiveModule;
+  selectedTurbine: string;
   currentData: TurbineData | null;
   alerts: Alert[];
   isLoading: boolean;
@@ -27,6 +28,7 @@ interface TurbineStore {
   
   // Actions
   setActiveModule: (module: ActiveModule) => void;
+  setSelectedTurbine: (turbine: string) => void;
   updateTurbineData: (data: TurbineData) => void;
   addAlert: (alert: Alert) => void;
   removeAlert: (alertId: string) => void;
@@ -40,6 +42,7 @@ interface TurbineStore {
 export const useTurbineStore = create<TurbineStore>((set, get) => ({
   // Initial state
   activeModule: 'overview',
+  selectedTurbine: 'Turbine-1',
   currentData: null,
   alerts: [],
   isLoading: false,
@@ -57,6 +60,7 @@ export const useTurbineStore = create<TurbineStore>((set, get) => ({
   
   // Actions
   setActiveModule: (module) => set({ activeModule: module }),
+  setSelectedTurbine: (turbine) => set({ selectedTurbine: turbine }),
   
   updateTurbineData: (data) => {
     const state = get();

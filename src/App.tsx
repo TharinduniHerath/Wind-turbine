@@ -8,7 +8,7 @@ import Overview from './components/Modules/Overview';
 import NoiseMonitoring from './components/noiseMonitoring/NoiseMonitoring';
 import PowerOptimization from './components/Modules/PowerOptimization';
 import WeatherImpact from './components/Modules/WeatherImpact';
-import Maintenance from './components/Modules/Maintenance';
+import Maintenance from './components/maintenanceMonitoring/Maintenance';
 import NoisePredictionPage from "./components/noiseMonitoring/NoisePredictionPage";
 import FutureNoisePrediction from "./components/noiseMonitoring/FuturePrediction";
 

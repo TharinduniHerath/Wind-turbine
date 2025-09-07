@@ -10,7 +10,7 @@ from noise.predict_V2.predict_V2 import recommend_pitch_with_noise
 router = APIRouter()
 
 # Initialize manager
-csv_path = r"noise\noiseData\wind_data.csv"
+csv_path = "noise/noiseData/wind_data.csv"
 
 manager = WebSocketManager(csv_path=csv_path, delay=30)
 
