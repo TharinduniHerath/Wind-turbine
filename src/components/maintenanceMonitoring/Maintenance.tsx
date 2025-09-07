@@ -6,6 +6,7 @@ import PredictiveAlert from './PredictiveAlert';
 import HealthScoreCard from './HealthScoreCard';
 import MaintenanceScheduleCard from './MaintenanceScheduleCard';
 import TurbineSelector from './TurbineSelector';
+import TurbineModel3D from './TurbineModel3D';
 
 
 
@@ -1066,6 +1067,9 @@ const Maintenance: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 3D Turbine Model */}
+      <TurbineModel3D />
 
       {/* Maintenance Schedule Modal */}
       {showMaintenanceModal && (

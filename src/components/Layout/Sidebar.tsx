@@ -5,15 +5,13 @@ import {
   Volume2, 
   Zap, 
   CloudRain, 
-  Settings,
-  Play,
-  Pause
+  Settings
 } from 'lucide-react';
 import { useTurbineStore } from '../../store/turbineStore';
 import { ActiveModule } from '../../types';
 
 const Sidebar: React.FC = () => {
-  const { activeModule, setActiveModule, simulationActive, toggleSimulation } = useTurbineStore();
+  const { activeModule, setActiveModule } = useTurbineStore();
 
   const navigationItems = [
     { id: 'overview' as ActiveModule, label: 'Overview', icon: Home },

@@ -59,5 +59,5 @@ export interface ChartDataPoint {
   predicted?: number;
 }
 
-export type ActiveModule = 'overview' | 'noise' | 'power' | 'weather' | 'maintenance' | 'noisePrediction';
+export type ActiveModule = 'overview' | 'noise' | 'power' | 'weather' | 'maintenance' | 'noisePrediction' | 'futureNoisePrediction';
 
