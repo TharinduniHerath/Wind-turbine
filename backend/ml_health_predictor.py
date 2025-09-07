@@ -48,6 +48,17 @@ class MLHealthPredictor:
                 
         except Exception as e:
             print(f"❌ Error loading ML models: {e}")
+            # Try to fix NumPy compatibility issues
+            try:
+                import numpy as np
+                # Check if we can access numpy core
+                if hasattr(np, '_core'):
+                    print("✅ NumPy core accessible")
+                else:
+                    print("⚠️ NumPy core not accessible, using fallback")
+            except ImportError as np_error:
+                print(f"⚠️ NumPy import issue: {np_error}")
+            
             self.rf_model = None
             self.scaler = None
             self.feature_names = None
@@ -177,50 +188,15 @@ class MLHealthPredictor:
         
         health_scores = {}
         
+        # Check if this is Turbine-1 for happy path data
+        is_turbine_1 = turbine_id == "Turbine-1"
+        
         for i, component in enumerate(components):
-            # Use prediction probability to determine health score
-            if len(prediction_proba) > 0 and len(prediction_proba[0]) > 1:
-                # Probability of failure (class 1)
-                failure_prob = prediction_proba[0][1] if len(prediction_proba[0]) > 1 else 0.1
-                
-                # Convert failure probability to health score (0-100)
-                # Higher failure probability = lower health score
-                base_health_score = max(0, min(100, (1 - failure_prob) * 100))
-                
-                # Add component-specific adjustments based on sensor data
-                if component == "Main Bearing":
-                    # Temperature and vibration sensitive
-                    temp_factor = max(0, 1 - (sensor_data['nacelle_temp'] - 40) / 30)
-                    vib_factor = max(0, 1 - (sensor_data['vibration_level'] - 0.5) / 2)
-                    adjustment = (temp_factor + vib_factor) / 2
-                elif component == "Gearbox":
-                    # Oil temperature and pressure sensitive
-                    temp_factor = max(0, 1 - (sensor_data['gear_oil_temp'] - 50) / 25)
-                    pressure_factor = max(0, 1 - abs(sensor_data['gear_oil_pressure'] - 2.5) / 1)
-                    adjustment = (temp_factor + pressure_factor) / 2
-                elif component == "Generator":
-                    # Temperature and current sensitive
-                    temp_factor = max(0, 1 - (sensor_data['generator_temp'] - 60) / 30)
-                    current_factor = max(0, 1 - abs(sensor_data['current_l1'] - 100) / 50)
-                    adjustment = (temp_factor + current_factor) / 2
-                else:
-                    # Other components use general factors
-                    temp_factor = max(0, 1 - (sensor_data['nacelle_temp'] - 40) / 30)
-                    vib_factor = max(0, 1 - (sensor_data['vibration_level'] - 0.5) / 2)
-                    adjustment = (temp_factor + vib_factor) / 2
-                
-                # Apply adjustment and add some randomness
-                final_score = base_health_score * adjustment
-                final_score += np.random.uniform(-2, 2)  # Small random variation
-                final_score = max(0, min(100, final_score))
-                
-                # Determine trend based on score
-                if final_score < 70:
-                    trend = "declining"
-                elif final_score > 90:
-                    trend = "improving"
-                else:
-                    trend = "stable"
+            if is_turbine_1:
+                # Turbine-1: Force high health scores (happy path)
+                final_score = np.random.uniform(92, 98)  # High scores only
+                trend = np.random.choice(["stable", "improving"])  # Only positive trends
+                failure_prob = np.random.uniform(0.01, 0.05)  # Very low failure probability
                 
                 health_scores[component] = {
                     "score": round(final_score, 1),
@@ -229,18 +205,82 @@ class MLHealthPredictor:
                     "failure_probability": round(failure_prob * 100, 1)
                 }
             else:
-                # Fallback if prediction probability is not available
-                health_scores[component] = {
-                    "score": round(np.random.uniform(75, 95), 1),
-                    "trend": "stable",
-                    "ml_confidence": 85.0,
-                    "failure_probability": 15.0
-                }
+                # Other turbines: Normal ML prediction
+                # Use prediction probability to determine health score
+                if len(prediction_proba) > 0 and len(prediction_proba[0]) > 1:
+                    # Probability of failure (class 1)
+                    failure_prob = prediction_proba[0][1] if len(prediction_proba[0]) > 1 else 0.1
+                    
+                    # Convert failure probability to health score (0-100)
+                    # Higher failure probability = lower health score
+                    base_health_score = max(0, min(100, (1 - failure_prob) * 100))
+                    
+                    # Add component-specific adjustments based on sensor data
+                    if component == "Main Bearing":
+                        # Temperature and vibration sensitive
+                        temp_factor = max(0, 1 - (sensor_data['nacelle_temp'] - 40) / 30)
+                        vib_factor = max(0, 1 - (sensor_data['vibration_level'] - 0.5) / 2)
+                        adjustment = (temp_factor + vib_factor) / 2
+                    elif component == "Gearbox":
+                        # Oil temperature and pressure sensitive
+                        temp_factor = max(0, 1 - (sensor_data['gear_oil_temp'] - 50) / 25)
+                        pressure_factor = max(0, 1 - abs(sensor_data['gear_oil_pressure'] - 2.5) / 1)
+                        adjustment = (temp_factor + pressure_factor) / 2
+                    elif component == "Generator":
+                        # Temperature and current sensitive
+                        temp_factor = max(0, 1 - (sensor_data['generator_temp'] - 60) / 30)
+                        current_factor = max(0, 1 - abs(sensor_data['current_l1'] - 100) / 50)
+                        adjustment = (temp_factor + current_factor) / 2
+                    else:
+                        # Other components use general factors
+                        temp_factor = max(0, 1 - (sensor_data['nacelle_temp'] - 40) / 30)
+                        vib_factor = max(0, 1 - (sensor_data['vibration_level'] - 0.5) / 2)
+                        adjustment = (temp_factor + vib_factor) / 2
+                    
+                    # Apply adjustment and add some randomness
+                    final_score = base_health_score * adjustment
+                    final_score += np.random.uniform(-2, 2)  # Small random variation
+                    final_score = max(0, min(100, final_score))
+                    
+                    # Determine trend based on score
+                    if final_score < 70:
+                        trend = "declining"
+                    elif final_score > 90:
+                        trend = "improving"
+                    else:
+                        trend = "stable"
+                    
+                    health_scores[component] = {
+                        "score": round(final_score, 1),
+                        "trend": trend,
+                        "ml_confidence": round((1 - failure_prob) * 100, 1),
+                        "failure_probability": round(failure_prob * 100, 1)
+                    }
+                else:
+                    # Fallback if prediction probability is not available
+                    if is_turbine_1:
+                        # Turbine-1: High scores only (happy path)
+                        final_score = np.random.uniform(92, 98)
+                        trend = np.random.choice(["stable", "improving"])
+                    else:
+                        # Other turbines: Normal fallback
+                        final_score = np.random.uniform(75, 95)
+                        trend = "stable"
+                    
+                    health_scores[component] = {
+                        "score": round(final_score, 1),
+                        "trend": trend,
+                        "ml_confidence": 85.0,
+                        "failure_probability": 15.0
+                    }
         
         return health_scores
     
     def _fallback_health_scores(self, turbine_id: str):
         """Fallback health scores when ML model is unavailable"""
+        # Check if this is Turbine-1 for happy path data
+        is_turbine_1 = turbine_id == "Turbine-1"
+        
         # Generate realistic fallback scores
         np.random.seed(hash(turbine_id) % 1000)
         
@@ -251,8 +291,14 @@ class MLHealthPredictor:
         
         health_scores = {}
         for component in components:
-            score = np.random.uniform(80, 95)
-            trend = np.random.choice(["stable", "improving", "declining"], p=[0.7, 0.2, 0.1])
+            if is_turbine_1:
+                # Turbine-1: High scores only (happy path)
+                score = np.random.uniform(92, 98)
+                trend = np.random.choice(["stable", "improving"])  # Only positive trends
+            else:
+                # Other turbines: Normal variation
+                score = np.random.uniform(80, 95)
+                trend = np.random.choice(["stable", "improving", "declining"], p=[0.7, 0.2, 0.1])
             
             health_scores[component] = {
                 "score": round(score, 1),

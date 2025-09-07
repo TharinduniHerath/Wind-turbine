@@ -80,6 +80,7 @@ const Maintenance: React.FC = () => {
   const [showEmailHistoryModal, setShowEmailHistoryModal] = useState(false);
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [emailHistory, setEmailHistory] = useState<any[]>([]);
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
   
   // State for all turbines data
   const [allTurbinesData, setAllTurbinesData] = useState<{
@@ -561,44 +562,50 @@ const Maintenance: React.FC = () => {
     }
   };
 
-  // Fetch system status on component mount and every 5 seconds
-  useEffect(() => {
-    const fetchSystemStatus = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  // Fetch system status function
+  const fetchSystemStatus = async () => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-        const response = await fetch('http://localhost:8000/api/system-status', {
-          signal: controller.signal,
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await fetch('http://localhost:8000/api/system-status', {
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         }
+      });
 
-        const data = await response.json();
-        setSystemStatus(data);
-      } catch (err) {
-        console.error('Error fetching system status:', err);
-        setSystemStatus(null); // Clear status on error
-      } finally {
-        setIsLoading(false);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
 
-    // Temporarily disable system status fetch to stop 404 errors
-    // fetchSystemStatus();
-    // const interval = setInterval(fetchSystemStatus, 5000);
-    // return () => clearInterval(interval);
+      const data = await response.json();
+      setSystemStatus(data);
+    } catch (err) {
+      console.error('Error fetching system status:', err);
+      // Set fallback system status instead of null
+      setSystemStatus({
+        status: "System Status Unavailable",
+        message: "Unable to fetch system status from backend",
+        severity: "unknown" as const,
+        recommendations: ["Check backend connection", "Verify API endpoints"],
+        metrics: {
+          average_health: 0,
+          critical_components: 0,
+          declining_components: 0,
+          due_maintenance: 0,
+          total_components: 0
+        }
+      });
+    }
+  };
+
+  // Fetch system status on component mount
+  useEffect(() => {
+    fetchSystemStatus();
   }, []);
 
   // Fetch all turbines data on component mount and every 5 minutes
@@ -624,7 +631,13 @@ const Maintenance: React.FC = () => {
   // Update displayed data when selectedTurbine changes
   useEffect(() => {
     try {
+      console.log(`🔄 Turbine changed to: ${selectedTurbine}`);
+      
+      // Set loading state to show refresh is happening
+      setIsLoading(true);
+      
       if (allTurbinesData[selectedTurbine]) {
+        console.log(`📊 Using cached data for ${selectedTurbine}`);
         setPredictions(allTurbinesData[selectedTurbine].predictions);
         setHealthScores(allTurbinesData[selectedTurbine].healthScores);
         // Ensure no pre-assigned technicians from API data
@@ -633,9 +646,30 @@ const Maintenance: React.FC = () => {
           assignedTechnician: undefined
         }));
         setMaintenanceSchedule(processedMaintenance);
+      } else {
+        console.log(`🔄 No cached data for ${selectedTurbine}, fetching fresh data...`);
+        // Fetch fresh data for the new turbine
+        fetchPredictions();
+        fetchHealthScores();
+        fetchMaintenanceSchedule();
       }
+      
+                // Always refresh system status when turbine changes
+          fetchSystemStatus();
+          
+          // Clear any existing errors
+          setError(null);
+          
+          // Update refresh timestamp
+          setLastRefreshTime(new Date());
+          
+          // Set loading to false after a short delay to show refresh completion
+          setTimeout(() => setIsLoading(false), 1000);
+      
     } catch (error) {
       console.error('🔧 Error in selectedTurbine useEffect:', error);
+      setError(`Failed to load data for ${selectedTurbine}`);
+      setIsLoading(false);
     }
   }, [selectedTurbine, allTurbinesData]);
 
@@ -668,6 +702,29 @@ const Maintenance: React.FC = () => {
         </div>
         <div className="flex items-center space-x-4">
           <TurbineSelector />
+          
+          {/* Refresh Data Button */}
+          <button 
+            onClick={() => {
+              setIsLoading(true);
+              setLastRefreshTime(new Date());
+              fetchAllTurbinesData();
+              fetchSystemStatus();
+              setTimeout(() => setIsLoading(false), 1000);
+            }}
+            className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+              isLoading 
+                ? 'bg-blue-400/20 border-blue-400/40 animate-pulse' 
+                : 'bg-blue-400/10 border-blue-400/20 hover:bg-blue-400/20'
+            }`}
+            disabled={isLoading}
+            title="Refresh All Data"
+          >
+            <svg className={`w-8 h-8 text-blue-400 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+          
           <button 
             onClick={() => setShowMaintenanceModal(true)}
             className="p-4 rounded-xl bg-amber-400/10 border border-amber-400/20 hover:bg-amber-400/20 transition-colors cursor-pointer"
@@ -695,6 +752,14 @@ const Maintenance: React.FC = () => {
               All Turbines: {allTurbinesData ? Object.keys(allTurbinesData).length : 0}/3
             </span>
           </div>
+          
+          {/* Last Refresh Time */}
+          <div className="flex items-center space-x-2 px-3 py-2 bg-blue-400/10 border border-blue-400/20 rounded-lg">
+            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+            <span className="text-xs text-blue-400 font-medium">
+              Last Refresh: {lastRefreshTime.toLocaleTimeString()}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -711,13 +776,13 @@ const Maintenance: React.FC = () => {
             <div className="flex items-center space-x-4">
               {/* Last Update Time */}
               <div className="text-xs text-slate-400">
-                Last Update: {new Date().toLocaleTimeString()}
+                Last Update: {lastRefreshTime.toLocaleTimeString()}
               </div>
               {/* Loading Indicator */}
               {isLoading && (
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-slate-400">Updating All Turbines...</span>
+                  <span className="text-xs text-blue-400 font-medium">Refreshing Data...</span>
                 </div>
               )}
             </div>
@@ -768,13 +833,13 @@ const Maintenance: React.FC = () => {
             <div className="flex items-center space-x-4">
               {/* Last Update Time */}
               <div className="text-xs text-slate-400">
-                Last Update: {new Date().toLocaleTimeString()}
+                Last Update: {lastRefreshTime.toLocaleTimeString()}
               </div>
               {/* Loading Indicator */}
               {isLoading && (
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-slate-400">Updating All Turbines...</span>
+                  <span className="text-xs text-blue-400 font-medium">Refreshing Data...</span>
                 </div>
               )}
             </div>
@@ -815,13 +880,13 @@ const Maintenance: React.FC = () => {
               <div className="flex items-center space-x-4">
                 {/* Last Update Time */}
                 <div className="text-xs text-slate-400">
-                  Last Update: {new Date().toLocaleTimeString()}
+                  Last Update: {lastRefreshTime.toLocaleTimeString()}
                 </div>
                 {/* Loading Indicator */}
                 {isLoading && (
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                                            <span className="text-xs text-slate-400">Refreshing LSTM predictions...</span>
+                    <span className="text-xs text-blue-400 font-medium">Refreshing Data...</span>
                   </div>
                 )}
               </div>
@@ -846,7 +911,22 @@ const Maintenance: React.FC = () => {
         </div>
 
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <h3 className="text-white font-semibold mb-4">System Overview</h3>
+                      <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-semibold">System Overview</h3>
+              <div className="flex items-center space-x-4">
+                {/* Last Update Time */}
+                <div className="text-xs text-slate-400">
+                  Last Update: {lastRefreshTime.toLocaleTimeString()}
+                </div>
+                {/* Loading Indicator */}
+                {isLoading && (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-blue-400 font-medium">Refreshing Data...</span>
+                  </div>
+                )}
+              </div>
+            </div>
 
           <div className="space-y-4">
             {/* Dynamic System Status */}

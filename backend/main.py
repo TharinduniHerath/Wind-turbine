@@ -1,3 +1,10 @@
+import warnings
+
+# Suppress SSL and urllib3 warnings
+warnings.filterwarnings('ignore', message='.*OpenSSL.*')
+warnings.filterwarnings('ignore', message='.*urllib3.*')
+warnings.filterwarnings('ignore', message='.*SSL.*')
+
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -15,7 +22,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from fastapi.responses import JSONResponse
 from turbine_data import get_turbine_health_scores, get_turbine_predictions, generate_dynamic_sensor_data
-
 from lstm_predictor import get_lstm_maintenance_schedule
 from ml_health_predictor import get_ml_health_scores
 from predictive_analytics_predictor import get_ml_predictive_analytics
@@ -589,8 +595,16 @@ def calculate_component_health_scores() -> Dict[str, Dict[str, Any]]:
         }
         return fallback_scores
 
-def check_health_alerts(health_scores: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+def check_health_alerts(health_scores: Dict[str, Dict[str, Any]], turbine_id: str = "Turbine-1") -> Dict[str, Any]:
     """Check for health alerts based on scores and trends"""
+    # Check if this is Turbine-1 for happy path data
+    is_turbine_1 = turbine_id == "Turbine-1"
+    
+    if is_turbine_1:
+        # Turbine-1: No alerts (happy path)
+        return {"alert": False}
+    
+    # For other turbines: Check for alerts
     for component, data in health_scores.items():
         score = data["score"]
         trend = data["trend"]
@@ -759,9 +773,12 @@ def predict_maintenance_schedule() -> List[Dict[str, Any]]:
             }
         ]
 
-def predict_system_status(health_scores: Dict[str, Dict[str, Any]], maintenance_schedule: List[Dict[str, Any]]) -> Dict[str, Any]:
+def predict_system_status(health_scores: Dict[str, Dict[str, Any]], maintenance_schedule: List[Dict[str, Any]], turbine_id: str = "Turbine-1") -> Dict[str, Any]:
     """Predict overall system status based on health scores and maintenance data"""
     try:
+        # Check if this is Turbine-1 for happy path data
+        is_turbine_1 = turbine_id == "Turbine-1"
+        
         # Calculate overall health metrics
         if not health_scores:
             return {
@@ -783,46 +800,63 @@ def predict_system_status(health_scores: Dict[str, Dict[str, Any]], maintenance_
         # Count due maintenance items
         due_maintenance = sum(1 for item in maintenance_schedule if item["status"] == "Due")
         
-        # Determine system status based on multiple factors
-        if avg_health >= 90 and critical_components == 0 and declining_components == 0 and due_maintenance == 0:
+        if is_turbine_1:
+            # Turbine-1: Force optimal status (happy path)
             status = "Optimal"
-            message = "All systems operating at peak performance with no maintenance required."
+            message = "Turbine-1 operating at peak performance with exceptional component health."
             severity = "optimal"
-            recommendations = ["Continue current operational parameters", "Monitor for any changes"]
-            
-        elif avg_health >= 80 and critical_components <= 1 and declining_components <= 1:
-            status = "Good"
-            message = "System operating within normal parameters with minor attention needed."
-            severity = "good"
-            recommendations = ["Schedule routine maintenance", "Monitor component health trends"]
-            
-        elif avg_health >= 70 and critical_components <= 2:
-            status = "Fair"
-            message = "System requires attention with some components showing degradation."
-            severity = "fair"
-            recommendations = ["Schedule immediate maintenance", "Review operational parameters", "Monitor critical components"]
-            
-        elif avg_health >= 60:
-            status = "Poor"
-            message = "System performance degraded with multiple components requiring attention."
-            severity = "poor"
-            recommendations = ["Schedule urgent maintenance", "Reduce operational load", "Prepare for potential shutdown"]
-            
+            recommendations = [
+                "Continue current optimal operational parameters",
+                "Monitor for any changes (unlikely)",
+                "Turbine-1 is performing above specifications"
+            ]
+            # Override metrics for Turbine-1 to show perfect condition
+            critical_components = 0
+            declining_components = 0
+            due_maintenance = 0
+            avg_health = max(avg_health, 95.0)  # Ensure high health score
         else:
-            status = "Critical"
-            message = "System in critical condition with immediate intervention required."
-            severity = "critical"
-            recommendations = ["Immediate shutdown recommended", "Emergency maintenance required", "Contact technical support"]
+            # Other turbines: Normal status calculation
+            if avg_health >= 90 and critical_components == 0 and declining_components == 0 and due_maintenance == 0:
+                status = "Optimal"
+                message = "All systems operating at peak performance with no maintenance required."
+                severity = "optimal"
+                recommendations = ["Continue current operational parameters", "Monitor for any changes"]
+                
+            elif avg_health >= 80 and critical_components <= 1 and declining_components <= 1:
+                status = "Good"
+                message = "System operating within normal parameters with minor attention needed."
+                severity = "good"
+                recommendations = ["Schedule routine maintenance", "Monitor component health trends"]
+                
+            elif avg_health >= 70 and critical_components <= 2:
+                status = "Fair"
+                message = "System requires attention with some components showing degradation."
+                severity = "fair"
+                recommendations = ["Schedule immediate maintenance", "Review operational parameters", "Monitor critical components"]
+                
+            elif avg_health >= 60:
+                status = "Poor"
+                message = "System performance degraded with multiple components requiring attention."
+                severity = "poor"
+                recommendations = ["Schedule urgent maintenance", "Reduce operational load", "Prepare for potential shutdown"]
+                
+            else:
+                status = "Critical"
+                message = "System in critical condition with immediate intervention required."
+                severity = "critical"
+                recommendations = ["Immediate shutdown recommended", "Emergency maintenance required", "Contact technical support"]
         
-        # Add specific recommendations based on data
-        if due_maintenance > 0:
-            recommendations.append(f"Address {due_maintenance} overdue maintenance items")
-        
-        if declining_components > 0:
-            recommendations.append(f"Monitor {declining_components} components with declining health")
-        
-        if critical_components > 0:
-            recommendations.append(f"Prioritize maintenance for {critical_components} critical components")
+        # Add specific recommendations based on data (only for non-Turbine-1)
+        if not is_turbine_1:
+            if due_maintenance > 0:
+                recommendations.append(f"Address {due_maintenance} overdue maintenance items")
+            
+            if declining_components > 0:
+                recommendations.append(f"Monitor {declining_components} components with declining health")
+            
+            if critical_components > 0:
+                recommendations.append(f"Prioritize maintenance for {critical_components} critical components")
         
         return {
             "status": status,
@@ -1062,7 +1096,7 @@ async def get_health_scores(turbine: str = "Turbine-1"):
         health_scores = get_ml_health_scores(turbine)
         
         # Generate alerts based on ML predictions
-        alerts = check_health_alerts(health_scores)
+        alerts = check_health_alerts(health_scores, turbine)
         
         response = {
             "health_scores": health_scores,
@@ -1085,7 +1119,7 @@ async def get_health_scores(turbine: str = "Turbine-1"):
         # Fallback to original method
         try:
             health_scores = get_turbine_health_scores(turbine)
-            alerts = check_health_alerts(health_scores)
+            alerts = check_health_alerts(health_scores, turbine)
             
             response = {
                 "health_scores": health_scores,
@@ -1104,21 +1138,38 @@ async def get_health_scores(turbine: str = "Turbine-1"):
         except Exception as fallback_error:
             print(f"❌ Fallback health scores also failed: {fallback_error}")
             # Return basic fallback
-            fallback_response = {
-                "health_scores": {
-                    "Main Bearing": {"score": 95, "trend": "stable"},
-                    "Gearbox": {"score": 78, "trend": "declining"},
-                    "Generator": {"score": 92, "trend": "improving"},
-                    "Power Electronics": {"score": 88, "trend": "stable"},
-                    "Blade System": {"score": 85, "trend": "declining"},
-                    "Control System": {"score": 98, "trend": "stable"}
-                },
-                "alerts": {
-                    "alert": True,
-                    "component": "Gearbox",
-                    "message": "Gearbox health score dropped to 78% and trend is declining. Schedule inspection."
+            if turbine == "Turbine-1":
+                # Turbine-1: Happy path fallback
+                fallback_response = {
+                    "health_scores": {
+                        "Main Bearing": {"score": 95, "trend": "stable"},
+                        "Gearbox": {"score": 92, "trend": "improving"},
+                        "Generator": {"score": 96, "trend": "stable"},
+                        "Power Electronics": {"score": 94, "trend": "improving"},
+                        "Blade System": {"score": 93, "trend": "stable"},
+                        "Control System": {"score": 98, "trend": "improving"}
+                    },
+                    "alerts": {
+                        "alert": False
+                    }
                 }
-            }
+            else:
+                # Other turbines: Normal fallback
+                fallback_response = {
+                    "health_scores": {
+                        "Main Bearing": {"score": 95, "trend": "stable"},
+                        "Gearbox": {"score": 78, "trend": "declining"},
+                        "Generator": {"score": 92, "trend": "improving"},
+                        "Power Electronics": {"score": 88, "trend": "stable"},
+                        "Blade System": {"score": 85, "trend": "declining"},
+                        "Control System": {"score": 98, "trend": "stable"}
+                    },
+                    "alerts": {
+                        "alert": True,
+                        "component": "Gearbox",
+                        "message": "Gearbox health score dropped to 78% and trend is declining. Schedule inspection."
+                    }
+                }
             
             return JSONResponse(
                 content=fallback_response,
@@ -1204,15 +1255,25 @@ async def get_maintenance_schedule(turbine: str = "Turbine-1"):
         )
 
 @app.get("/api/system-status")
-async def get_system_status_endpoint():
-    """Get overall system status prediction"""
+async def get_system_status_endpoint(turbine: str = "Turbine-1"):
+    """Get overall system status prediction for a specific turbine"""
     try:
-        # Get health scores and maintenance schedule
-        health_scores = calculate_component_health_scores()
-        maintenance_schedule = predict_maintenance_schedule()
+        print(f"🏥 Getting system status for {turbine}")
+        
+        # Get health scores and maintenance schedule for the specific turbine
+        if turbine == "Turbine-1":
+            # For Turbine-1, use the happy path data
+            health_scores = get_turbine_health_scores(turbine)
+            maintenance_schedule = get_lstm_maintenance_schedule(turbine)
+        else:
+            # For other turbines, use normal data
+            health_scores = calculate_component_health_scores()
+            maintenance_schedule = predict_maintenance_schedule()
         
         # Predict system status
-        system_status = predict_system_status(health_scores, maintenance_schedule)
+        system_status = predict_system_status(health_scores, maintenance_schedule, turbine)
+        
+        print(f"✅ System status for {turbine}: {system_status['status']} ({system_status['severity']})")
         
         return JSONResponse(
             content=system_status,

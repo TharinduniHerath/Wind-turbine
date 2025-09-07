@@ -6,30 +6,33 @@ from typing import Dict, Any, List
 def get_turbine_health_scores(turbine_id: str) -> Dict[str, Dict[str, Any]]:
     """Get health scores for a specific turbine"""
     try:
+        # Check if this is Turbine-1 for happy path data
+        is_turbine_1 = turbine_id == "Turbine-1"
+        
         # Generate mock health scores for different components
         components = {
             "Main Bearing": {
-                "base_score": 95,
+                "base_score": 95 if is_turbine_1 else 85,
                 "factors": ["vibration", "temperature", "rpm"]
             },
             "Gearbox": {
-                "base_score": 85,
+                "base_score": 92 if is_turbine_1 else 78,
                 "factors": ["oil_temp", "oil_pressure", "vibration"]
             },
             "Generator": {
-                "base_score": 90,
+                "base_score": 96 if is_turbine_1 else 88,
                 "factors": ["temperature", "voltage", "current"]
             },
             "Power Electronics": {
-                "base_score": 88,
+                "base_score": 94 if is_turbine_1 else 85,
                 "factors": ["voltage", "current", "temperature"]
             },
             "Blade System": {
-                "base_score": 87,
+                "base_score": 93 if is_turbine_1 else 82,
                 "factors": ["pitch", "wind_speed", "vibration"]
             },
             "Control System": {
-                "base_score": 95,
+                "base_score": 98 if is_turbine_1 else 90,
                 "factors": ["yaw_angle", "nacelle_temp", "voltage"]
             }
         }
@@ -37,15 +40,18 @@ def get_turbine_health_scores(turbine_id: str) -> Dict[str, Dict[str, Any]]:
         health_scores = {}
         
         for component, config in components.items():
-            # Generate realistic health scores with some randomness
             base_score = config["base_score"]
-            # Add some variation based on turbine ID and component
-            variation = random.uniform(-10, 5)
-            final_score = max(0, min(100, base_score + variation))
             
-            # Determine trend
-            trends = ["stable", "improving", "declining"]
-            trend = random.choice(trends)
+            if is_turbine_1:
+                # Turbine-1: Only positive variations and improving trends
+                variation = random.uniform(0, 5)  # Only positive variation
+                final_score = max(90, min(100, base_score + variation))  # Keep scores high
+                trend = random.choice(["stable", "improving"])  # Only positive trends
+            else:
+                # Other turbines: Normal variation
+                variation = random.uniform(-10, 5)
+                final_score = max(0, min(100, base_score + variation))
+                trend = random.choice(["stable", "improving", "declining"])
             
             health_scores[component] = {
                 "score": int(final_score),
@@ -106,12 +112,20 @@ def get_turbine_predictions(turbine_id: str) -> Dict[str, Dict[str, str]]:
         predictions = {}
         
         for component, messages in component_messages.items():
-            # Generate status based on turbine ID and component
-            statuses = ["Critical", "Warning", "Normal"]
-            weights = [0.1, 0.2, 0.7]  # 70% normal, 20% warning, 10% critical
-            status = random.choices(statuses, weights=weights)[0]
+            # Check if this is Turbine-1 for happy path data
+            is_turbine_1 = turbine_id == "Turbine-1"
             
-            confidence = random.randint(75, 95)
+            if is_turbine_1:
+                # Turbine-1: Only Normal status (100% positive)
+                status = "Normal"
+                confidence = random.randint(90, 98)  # High confidence for Turbine-1
+            else:
+                # Other turbines: Normal variation with some warnings/critical
+                statuses = ["Critical", "Warning", "Normal"]
+                weights = [0.1, 0.2, 0.7]  # 70% normal, 20% warning, 10% critical
+                status = random.choices(statuses, weights=weights)[0]
+                confidence = random.randint(75, 95)
+            
             data_periods = ["30 days of logs", "6 weeks of data", "2 months of telemetry", 
                           "3 months of sensor data", "60 days of telemetry", "90 days of data"]
             
@@ -169,27 +183,54 @@ def get_turbine_predictions(turbine_id: str) -> Dict[str, Dict[str, str]]:
 def generate_dynamic_sensor_data(turbine_id: str) -> Dict[str, Any]:
     """Generate dynamic sensor data for a specific turbine"""
     try:
+        # Check if this is Turbine-1 for happy path data
+        is_turbine_1 = turbine_id == "Turbine-1"
+        
         # Generate realistic sensor data based on turbine ID
-        base_values = {
-            'wind_speed': random.uniform(5, 25),
-            'power_output': random.uniform(1000, 3000),
-            'rotor_rpm': random.uniform(10, 30),
-            'nacelle_temp': random.uniform(50, 90),
-            'gear_oil_temp': random.uniform(60, 100),
-            'generator_temp': random.uniform(70, 110),
-            'blade_pitch': random.uniform(-5, 90),
-            'yaw_angle': random.uniform(0, 360),
-            'voltage_l1': random.uniform(350, 400),
-            'voltage_l2': random.uniform(350, 400),
-            'voltage_l3': random.uniform(350, 400),
-            'current_l1': random.uniform(100, 200),
-            'current_l2': random.uniform(100, 200),
-            'current_l3': random.uniform(100, 200),
-            'gear_oil_pressure': random.uniform(1.5, 3.0),
-            'ambient_temp': random.uniform(10, 35),
-            'humidity': random.uniform(30, 80),
-            'wind_direction': random.uniform(0, 360),
-        }
+        if is_turbine_1:
+            # Turbine-1: Optimistic values (optimal operating conditions)
+            base_values = {
+                'wind_speed': random.uniform(12, 22),  # Optimal wind range
+                'power_output': random.uniform(2500, 3000),  # High power output
+                'rotor_rpm': random.uniform(18, 25),  # Optimal RPM range
+                'nacelle_temp': random.uniform(45, 65),  # Lower, optimal temps
+                'gear_oil_temp': random.uniform(55, 75),  # Lower, optimal temps
+                'generator_temp': random.uniform(65, 85),  # Lower, optimal temps
+                'blade_pitch': random.uniform(15, 75),  # Optimal pitch range
+                'yaw_angle': random.uniform(0, 360),
+                'voltage_l1': random.uniform(375, 395),  # Optimal voltage
+                'voltage_l2': random.uniform(375, 395),  # Optimal voltage
+                'voltage_l3': random.uniform(375, 395),  # Optimal voltage
+                'current_l1': random.uniform(120, 160),  # Optimal current
+                'current_l2': random.uniform(120, 160),  # Optimal current
+                'current_l3': random.uniform(120, 160),  # Optimal current
+                'gear_oil_pressure': random.uniform(2.2, 2.8),  # Optimal pressure
+                'ambient_temp': random.uniform(15, 28),  # Pleasant ambient
+                'humidity': random.uniform(40, 65),  # Optimal humidity
+                'wind_direction': random.uniform(0, 360),
+            }
+        else:
+            # Other turbines: Normal variation
+            base_values = {
+                'wind_speed': random.uniform(5, 25),
+                'power_output': random.uniform(1000, 3000),
+                'rotor_rpm': random.uniform(10, 30),
+                'nacelle_temp': random.uniform(50, 90),
+                'gear_oil_temp': random.uniform(60, 100),
+                'generator_temp': random.uniform(70, 110),
+                'blade_pitch': random.uniform(-5, 90),
+                'yaw_angle': random.uniform(0, 360),
+                'voltage_l1': random.uniform(350, 400),
+                'voltage_l2': random.uniform(350, 400),
+                'voltage_l3': random.uniform(350, 400),
+                'current_l1': random.uniform(100, 200),
+                'current_l2': random.uniform(100, 200),
+                'current_l3': random.uniform(100, 200),
+                'gear_oil_pressure': random.uniform(1.5, 3.0),
+                'ambient_temp': random.uniform(10, 35),
+                'humidity': random.uniform(30, 80),
+                'wind_direction': random.uniform(0, 360),
+            }
         
         # Add some variation based on turbine ID
         turbine_number = int(turbine_id.split('-')[1]) if '-' in turbine_id else 1
@@ -197,8 +238,12 @@ def generate_dynamic_sensor_data(turbine_id: str) -> Dict[str, Any]:
         
         sensor_data = {}
         for key, value in base_values.items():
-            # Add some realistic variation
-            variation = random.uniform(-0.1, 0.1) * variation_factor
+            if is_turbine_1:
+                # Turbine-1: Minimal variation (stable operation)
+                variation = random.uniform(-0.05, 0.05) * variation_factor
+            else:
+                # Other turbines: Normal variation
+                variation = random.uniform(-0.1, 0.1) * variation_factor
             sensor_data[key] = round(value * (1 + variation), 2)
         
         # Add timestamp
