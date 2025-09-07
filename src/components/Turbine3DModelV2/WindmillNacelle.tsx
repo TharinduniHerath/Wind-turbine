@@ -122,7 +122,7 @@ import { useFrame } from "@react-three/fiber";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { Html } from "@react-three/drei";
 
-export default function WindmillNacelle({ rpm  ,windDirection , showInternals = true, position = [0, 0, 0] } ) {
+export default function WindmillNacelle({ rpm  ,windDirection ,windSpeed = 0, showInternals = true, position = [0, 0, 0] } ) {
   const shaftRef = useRef();
   const lightRef = useRef();
   const lightMeshRef = useRef();
@@ -185,8 +185,11 @@ export default function WindmillNacelle({ rpm  ,windDirection , showInternals = 
       lightMeshRef.current.material.emissiveIntensity = intensity * 2;
 
     if (anemometerRef.current) {
-      anemometerRef.current.rotation.y += delta * 4;
-    }
+    const speed = Number(windSpeed) || 0; 
+    const rotationSpeed = speed * 0.5; // rad/sec, tweak factor
+    rotationRef.current += rotationSpeed * delta;
+    anemometerRef.current.rotation.y = rotationRef.current;
+  }
   });
 
   const handleHover = (name, object) => {

@@ -172,9 +172,10 @@ const PredictionPage: React.FC = () => {
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} />
         <TurbineModel
-          rpm={prediction.predicted_rpm}
-          pitch={prediction.best_pitch_angle}
+          rpm={prediction.rotor_speed}
+          pitch={prediction.pitch_angle}
           windDirection={parseFloat(windDirection)}
+          windSpeed={parseFloat(windSpeed)}
           position={[0, -5, 0]}
           scale={[0.5, 0.5, 0.5]}
         />
