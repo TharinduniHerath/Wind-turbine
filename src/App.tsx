@@ -87,7 +87,7 @@ function App() {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 ml-64 overflow-y-auto p-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeModule}

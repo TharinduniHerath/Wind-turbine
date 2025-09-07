@@ -54,7 +54,7 @@ const PredictionPage: React.FC = () => {
       {/* Header with title and Live button */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Predict Noise & Turbine Behavior</h1>
-          <div className="space-x-2">
+          <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
         <button
           onClick={() => setActiveModule('noise')}
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow"

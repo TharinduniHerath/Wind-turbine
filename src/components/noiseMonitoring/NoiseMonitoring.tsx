@@ -36,7 +36,7 @@ const NoiseMonitoring: React.FC = () => {
       {/* Header & Buttons */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Real-Time Noise Monitoring</h1>
-        <div className="space-x-2">
+        <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
           <button
             onClick={() => setActiveModule('noisePrediction')}
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow"
@@ -94,7 +94,7 @@ const NoiseMonitoring: React.FC = () => {
         dataKey="timestamp"
         stroke="#ccc"
         tickFormatter={(value) => {
-          const date = new Date(value);
+          const date = new Date(value * 1000);
           return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         }}
       />
@@ -120,7 +120,7 @@ const NoiseMonitoring: React.FC = () => {
         dataKey="timestamp"
         stroke="#ccc"
         tickFormatter={(value) => {
-          const date = new Date(value);
+          const date = new Date(value * 1000);
           return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         }}
       />

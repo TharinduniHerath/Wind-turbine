@@ -24,7 +24,7 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <div className="bg-slate-800 w-64 h-full flex flex-col border-r border-slate-700">
+    <div className="bg-slate-800 w-64 h-screen flex flex-col border-r border-slate-700 fixed top-25 left-0">
       {/* Navigation */}
       <nav className="flex-1 p-4">
         <div className="space-y-2">

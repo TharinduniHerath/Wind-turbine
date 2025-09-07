@@ -9,7 +9,7 @@ const Header: React.FC = () => {
   const isOnline = currentData !== null;
 
   return (
-    <header className="bg-slate-900 border-b border-slate-700 px-6 py-4">
+    <header className="bg-slate-900 border-b border-slate-700 px-6 py-4 sticky top-0 z-50">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <motion.div
