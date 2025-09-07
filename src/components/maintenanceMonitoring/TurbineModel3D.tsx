@@ -3,13 +3,68 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import WindTurbine from '../WTModelMaintenance/WindTurbine';
 
-const TurbineModel3D: React.FC = () => {
+interface TurbineModel3DProps {
+  isModal?: boolean;
+}
+
+const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false }) => {
+  if (isModal) {
+    // Modal version - fills entire container
+    return (
+      <Canvas
+        camera={{ 
+          position: [4, 12.5, 4], 
+          fov: 35 
+        }}
+        shadows
+        className="w-full h-full"
+        style={{ 
+          display: 'block',
+          width: '100%',
+          height: '100%'
+        }}
+        resize={{ scroll: false, debounce: { scroll: 50, resize: 0 } }}
+      >
+          <Suspense fallback={null}>
+            {/* Lighting */}
+            <ambientLight intensity={0.4} />
+            <directionalLight
+              position={[10, 20, 5]}
+              intensity={1}
+              castShadow
+              shadow-mapSize-width={1024}
+              shadow-mapSize-height={1024}
+            />
+            
+            {/* Environment */}
+            <Environment preset="sunset" />
+            
+            {/* Wind Turbine Model */}
+            <WindTurbine rpm={12} pitch={Math.PI / 7} />
+            
+            {/* Controls */}
+            <OrbitControls 
+              target={[0, 12.5, 0]}
+              enablePan={true}
+              enableZoom={true}
+              enableRotate={true}
+              minDistance={2}
+              maxDistance={15}
+              autoRotate={false}
+              autoRotateSpeed={0.5}
+            />
+          </Suspense>
+        </Canvas>
+    );
+  }
+
+  // Regular version - with header and fixed height
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700">
-      <div className="p-6 border-b border-slate-700">
+    <div className="w-full">
+      <div className="mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-white font-semibold">3D Turbine Model</h3>
+            <h4 className="text-white font-semibold">3D Turbine Model</h4>
             <p className="text-slate-400 text-sm mt-1">
               Interactive 3D visualization of wind turbine components
             </p>
@@ -20,14 +75,14 @@ const TurbineModel3D: React.FC = () => {
         </div>
       </div>
       
-      <div className="relative h-96">
+      <div className="relative h-96 bg-slate-900 rounded-lg border border-slate-600 overflow-hidden">
         <Canvas
           camera={{ 
-            position: [12, 8, 12], 
-            fov: 50 
+            position: [4, 12.5, 4], 
+            fov: 35 
           }}
           shadows
-          className="rounded-b-xl"
+          className="rounded-lg"
         >
           <Suspense fallback={null}>
             {/* Lighting */}
@@ -48,11 +103,12 @@ const TurbineModel3D: React.FC = () => {
             
             {/* Controls */}
             <OrbitControls 
+              target={[0, 12.5, 0]}
               enablePan={true}
               enableZoom={true}
               enableRotate={true}
-              minDistance={8}
-              maxDistance={25}
+              minDistance={2}
+              maxDistance={15}
               autoRotate={false}
               autoRotateSpeed={0.5}
             />
