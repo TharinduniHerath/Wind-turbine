@@ -41,7 +41,7 @@ const FutureNoisePrediction: React.FC = () => {
         params: {
           lat: location.lat,
           lon: location.lng,
-          target_noise: 35,
+          target_noise: 50,
         },
       });
 

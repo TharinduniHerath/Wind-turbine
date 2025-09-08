@@ -2,7 +2,9 @@ import React, { useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useNoiseStore } from "../../store/noiseStore";
 import TurbineModel from "../Turbine3DModelV2/WindTurbine";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls,Sky } from "@react-three/drei";
+import { Volume2, Wind, Compass, Zap, Gauge, Move } from "lucide-react";
+
 import { useTurbineStore } from '../../store/turbineStore';
 import {
   LineChart,
@@ -140,6 +142,7 @@ const NoiseMonitoring: React.FC = () => {
        <div className="h-[500px] mt-6 border rounded bg-gray-900 relative">
         <Canvas camera={{ position: [0, 5, 10], fov: 50 }}>
           <color attach="background" args={["lightblue"]} />
+          <Sky sunPosition={[100, 20, 10]} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 5, 5]} />
           <TurbineModel
