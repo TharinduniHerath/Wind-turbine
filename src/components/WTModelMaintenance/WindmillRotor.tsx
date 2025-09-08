@@ -73,10 +73,11 @@ interface WindmillRotorProps {
   rpm?: number;
   pitch?: number;
   position?: [number, number, number];
+  hideLabels?: boolean;
 }
 
 // --- FUNCTIONAL COMPONENT ---
-export default function WindmillRotor({ rpm = 10, pitch = Math.PI / 8, position = [0, 10, 1.2] }: WindmillRotorProps) {
+export default function WindmillRotor({ rpm = 10, pitch = Math.PI / 8, position = [0, 10, 1.2], hideLabels = false }: WindmillRotorProps) {
   const rotorRef = useRef<WindmillRotorMesh>();
   const { scene, camera, gl } = useThree();
 
@@ -124,6 +125,90 @@ export default function WindmillRotor({ rpm = 10, pitch = Math.PI / 8, position 
 
   return (
     <>
+      {/* Permanent Labels for Rotor Components */}
+      {!hideLabels && (
+        <>
+          {/* Rotor Hub Label */}
+          <Html position={[position[0], position[1] + 0.8, position[2]]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(238,238,238,0.9)",
+            color: "black",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(0,0,0,0.3)",
+            textShadow: "1px 1px 2px rgba(255,255,255,0.8)",
+          }}
+        >
+          Rotor Hub
+        </div>
+      </Html>
+
+      {/* Rotor Blade Labels */}
+      <Html position={[position[0] + 3, position[1], position[2]]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(204,204,204,0.9)",
+            color: "black",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(0,0,0,0.3)",
+            textShadow: "1px 1px 2px rgba(255,255,255,0.8)",
+          }}
+        >
+          Rotor Blade 1
+        </div>
+      </Html>
+
+      <Html position={[position[0] - 1.5, position[1] - 2.5, position[2]]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(204,204,204,0.9)",
+            color: "black",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(0,0,0,0.3)",
+            textShadow: "1px 1px 2px rgba(255,255,255,0.8)",
+          }}
+        >
+          Rotor Blade 2
+        </div>
+      </Html>
+
+      <Html position={[position[0] - 1.5, position[1] + 2.5, position[2]]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(204,204,204,0.9)",
+            color: "black",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(0,0,0,0.3)",
+            textShadow: "1px 1px 2px rgba(255,255,255,0.8)",
+          }}
+        >
+          Rotor Blade 3
+        </div>
+      </Html>
+        </>
+      )}
+
+      {/* Hover Label */}
       {hoveredObj && (
         <Html
           position={hoveredObj.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.5, 0))}

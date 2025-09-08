@@ -1084,7 +1084,7 @@ const Maintenance: React.FC = () => {
                   className="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
                   title="Click to expand 3D model"
                 >
-                  <TurbineModel3D />
+                  <TurbineModel3D hideLabels={show3DModal} />
                 </div>
               </div>
             </div>

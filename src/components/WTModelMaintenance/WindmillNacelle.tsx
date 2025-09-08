@@ -10,6 +10,7 @@ interface WindmillNacelleProps {
   windDirection?: number;
   showInternals?: boolean;
   position?: [number, number, number];
+  hideLabels?: boolean;
 }
 
 interface HoveredPart {
@@ -21,7 +22,8 @@ export default function WindmillNacelle({
   rpm = 10, 
   windDirection = 190, 
   showInternals = true, 
-  position = [0, 0, 0] 
+  position = [0, 0, 0],
+  hideLabels = false
 }: WindmillNacelleProps) {
   const shaftRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
@@ -339,6 +341,106 @@ export default function WindmillNacelle({
           <meshStandardMaterial color="silver" />
         </mesh>
       </group>
+
+      {/* Permanent Labels for Key Components */}
+      {!hideLabels && (
+        <>
+          {/* Gearbox Label */}
+          <Html position={[0, 0.6, 0.25]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(255,0,0,0.8)",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(255,255,255,0.3)",
+            textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+          }}
+        >
+          Gearbox
+        </div>
+      </Html>
+
+      {/* Generator Label */}
+      <Html position={[0, 0.5, -0.8]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(0,102,204,0.8)",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(255,255,255,0.3)",
+            textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+          }}
+        >
+          Generator
+        </div>
+      </Html>
+
+      {/* Main Shaft Bearings Label */}
+      <Html position={[0, 0.3, 1]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(102,102,102,0.8)",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(255,255,255,0.3)",
+            textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+          }}
+        >
+          Main Shaft Bearings
+        </div>
+      </Html>
+
+      {/* Controller Label */}
+      <Html position={[0.6, 0.2, 0.25]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(255,170,0,0.8)",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(255,255,255,0.3)",
+            textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+          }}
+        >
+          Controller
+        </div>
+      </Html>
+
+      {/* Cooler Label */}
+      <Html position={[0, 0.3, -1.2]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(0,204,153,0.8)",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(255,255,255,0.3)",
+            textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+          }}
+        >
+          Cooler
+        </div>
+      </Html>
+        </>
+      )}
 
       {/* Hover Label */}
       {hoveredPart && hoveredPart.object && (

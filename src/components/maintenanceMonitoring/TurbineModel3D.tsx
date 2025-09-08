@@ -5,9 +5,10 @@ import WindTurbine from '../WTModelMaintenance/WindTurbine';
 
 interface TurbineModel3DProps {
   isModal?: boolean;
+  hideLabels?: boolean;
 }
 
-const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false }) => {
+const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false, hideLabels = false }) => {
   if (isModal) {
     // Modal version - fills entire container
     return (
@@ -40,7 +41,7 @@ const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false }) => {
             <Environment preset="sunset" />
             
             {/* Wind Turbine Model */}
-            <WindTurbine rpm={12} pitch={Math.PI / 7} />
+            <WindTurbine rpm={12} pitch={Math.PI / 7} hideLabels={false} />
             
             {/* Controls */}
             <OrbitControls 
@@ -99,7 +100,7 @@ const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false }) => {
             <Environment preset="sunset" />
             
             {/* Wind Turbine Model */}
-            <WindTurbine rpm={12} pitch={Math.PI / 7} />
+            <WindTurbine rpm={12} pitch={Math.PI / 7} hideLabels={hideLabels} />
             
             {/* Controls */}
             <OrbitControls 
