@@ -1,0 +1,220 @@
+{
+    "metadata": {
+        "created_date": "2025-08-15T16:23:44.233759",
+        "analysis_period": "2023-01-01 00:00:00 to 2023-12-31 23:00:00",
+        "total_turbines": 30,
+        "description": "Wind direction corrections: turbine_forecast_direction = nasa_forecast_direction + correction"
+    },
+    "corrections": {
+        "WTG01": {
+            "offset_degrees": 9.63921890720588,
+            "uncertainty_degrees": 75.62894008742283,
+            "confidence": 0.5798392217365398,
+            "data_points": 8752,
+            "recommended_use": true
+        },
+        "WTG02": {
+            "offset_degrees": -25.380610841446273,
+            "uncertainty_degrees": 77.74998371559629,
+            "confidence": 0.568055646024465,
+            "data_points": 8752,
+            "recommended_use": true
+        },
+        "WTG03": {
+            "offset_degrees": -1.9531445271638335,
+            "uncertainty_degrees": 75.25327288952232,
+            "confidence": 0.5819262617248759,
+            "data_points": 8752,
+            "recommended_use": true
+        },
+        "WTG04": {
+            "offset_degrees": -0.2810961436959944,
+            "uncertainty_degrees": 75.25120698391125,
+            "confidence": 0.5819377389782708,
+            "data_points": 8753,
+            "recommended_use": true
+        },
+        "WTG05": {
+            "offset_degrees": -2.665859532620627,
+            "uncertainty_degrees": 75.45978129650902,
+            "confidence": 0.580778992797172,
+            "data_points": 8748,
+            "recommended_use": true
+        },
+        "WTG06": {
+            "offset_degrees": -3.7320700378086804,
+            "uncertainty_degrees": 74.32403787251992,
+            "confidence": 0.5870886784860004,
+            "data_points": 8585,
+            "recommended_use": true
+        },
+        "WTG07": {
+            "offset_degrees": -1.2707372978284914,
+            "uncertainty_degrees": 72.53683648929915,
+            "confidence": 0.5970175750594492,
+            "data_points": 8512,
+            "recommended_use": true
+        },
+        "WTG08": {
+            "offset_degrees": -1.1959705387448158,
+            "uncertainty_degrees": 75.31089083913801,
+            "confidence": 0.5816061620047888,
+            "data_points": 8747,
+            "recommended_use": true
+        },
+        "WTG09": {
+            "offset_degrees": -1.149499217265071,
+            "uncertainty_degrees": 75.31387510388384,
+            "confidence": 0.5815895827562009,
+            "data_points": 8731,
+            "recommended_use": true
+        },
+        "WTG10": {
+            "offset_degrees": -1.3524025468917444,
+            "uncertainty_degrees": 75.92681110854518,
+            "confidence": 0.5781843827303046,
+            "data_points": 8630,
+            "recommended_use": true
+        },
+        "WTG12": {
+            "offset_degrees": -1.2429027116091154,
+            "uncertainty_degrees": 74.88779787675337,
+            "confidence": 0.5839566784624812,
+            "data_points": 8725,
+            "recommended_use": true
+        },
+        "WTG13": {
+            "offset_degrees": -0.15835002077027832,
+            "uncertainty_degrees": 75.21922376585354,
+            "confidence": 0.5821154235230359,
+            "data_points": 8750,
+            "recommended_use": true
+        },
+        "WTG14": {
+            "offset_degrees": -2.0126993024182345,
+            "uncertainty_degrees": 75.22235958257511,
+            "confidence": 0.5820980023190272,
+            "data_points": 8742,
+            "recommended_use": true
+        },
+        "WTG15": {
+            "offset_degrees": -10.234826189666988,
+            "uncertainty_degrees": 75.870591532838,
+            "confidence": 0.5784967137064555,
+            "data_points": 8751,
+            "recommended_use": true
+        },
+        "WTG16": {
+            "offset_degrees": -3.342213143812496,
+            "uncertainty_degrees": 75.45218593807948,
+            "confidence": 0.5808211892328918,
+            "data_points": 8753,
+            "recommended_use": true
+        },
+        "WTG17": {
+            "offset_degrees": -0.5625613717779061,
+            "uncertainty_degrees": 75.13002168721036,
+            "confidence": 0.582610990626609,
+            "data_points": 8747,
+            "recommended_use": true
+        },
+        "WTG18": {
+            "offset_degrees": -2.168977690905966,
+            "uncertainty_degrees": 75.24769670915057,
+            "confidence": 0.5819572405047191,
+            "data_points": 8733,
+            "recommended_use": true
+        },
+        "WTG19": {
+            "offset_degrees": -0.7286714922746949,
+            "uncertainty_degrees": 75.31703958089076,
+            "confidence": 0.5815720023283846,
+            "data_points": 8745,
+            "recommended_use": true
+        },
+        "WTG20": {
+            "offset_degrees": 0.035622235616567514,
+            "uncertainty_degrees": 76.17809035050261,
+            "confidence": 0.5767883869416521,
+            "data_points": 8193,
+            "recommended_use": true
+        },
+        "WTG21": {
+            "offset_degrees": -4.814929834100869,
+            "uncertainty_degrees": 75.35650217152995,
+            "confidence": 0.5813527657137225,
+            "data_points": 8750,
+            "recommended_use": true
+        },
+        "WTG22": {
+            "offset_degrees": -1.2408103463048816,
+            "uncertainty_degrees": 75.22277446944177,
+            "confidence": 0.5820956973919902,
+            "data_points": 8749,
+            "recommended_use": true
+        },
+        "WTG23": {
+            "offset_degrees": -0.9218003347241992,
+            "uncertainty_degrees": 75.16552244187262,
+            "confidence": 0.5824137642118188,
+            "data_points": 8564,
+            "recommended_use": true
+        },
+        "WTG24": {
+            "offset_degrees": -1.0871660912649768,
+            "uncertainty_degrees": 75.2171189038409,
+            "confidence": 0.582127117200884,
+            "data_points": 8749,
+            "recommended_use": true
+        },
+        "WTG25": {
+            "offset_degrees": 0.5714858237624943,
+            "uncertainty_degrees": 75.10358548414725,
+            "confidence": 0.5827578584214042,
+            "data_points": 8753,
+            "recommended_use": true
+        },
+        "WTG26": {
+            "offset_degrees": -1.465266464958696,
+            "uncertainty_degrees": 74.66533035451451,
+            "confidence": 0.585192609141586,
+            "data_points": 8622,
+            "recommended_use": true
+        },
+        "WTG29": {
+            "offset_degrees": -0.6017081567866562,
+            "uncertainty_degrees": 75.17621878033391,
+            "confidence": 0.582354340109256,
+            "data_points": 8749,
+            "recommended_use": true
+        },
+        "WTG30": {
+            "offset_degrees": -1.4645895173690457,
+            "uncertainty_degrees": 75.18286392666866,
+            "confidence": 0.5823174226296186,
+            "data_points": 8750,
+            "recommended_use": true
+        },
+        "WTG31": {
+            "offset_degrees": -3.828643161195876,
+            "uncertainty_degrees": 76.27810816619831,
+            "confidence": 0.5762327324100094,
+            "data_points": 8749,
+            "recommended_use": true
+        },
+        "WTG32": {
+            "offset_degrees": -48.90279260408074,
+            "uncertainty_degrees": 80.57696010786728,
+            "confidence": 0.5523502216229595,
+            "data_points": 8744,
+            "recommended_use": true
+        },
+        "WTG33": {
+            "offset_degrees": -16.810021136830162,
+            "uncertainty_degrees": 76.4445830440389,
+            "confidence": 0.5753078719775617,
+            "data_points": 8669,
+            "recommended_use": true
+        }
+    }
+}
