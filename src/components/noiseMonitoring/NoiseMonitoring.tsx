@@ -56,34 +56,45 @@ const NoiseMonitoring: React.FC = () => {
       </div>
 
       {/* Latest Values Cards */}
-      {latest && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-          <div className="bg-gray-800 p-4 rounded text-center">
-            <p className="text-gray-400">Noise Level</p>
-            <h2 className="text-white font-bold">{latest.noise_level} dB</h2>
-          </div>
-          <div className="bg-gray-800 p-4 rounded text-center">
-            <p className="text-gray-400">Wind Speed</p>
-            <h2 className="text-white font-bold">{latest.wind_speed} m/s</h2>
-          </div>
-          <div className="bg-gray-800 p-4 rounded text-center">
-            <p className="text-gray-400">Wind Direction</p>
-            <h2 className="text-white font-bold">{latest.wind_direction}°</h2>
-          </div>
-          <div className="bg-gray-800 p-4 rounded text-center">
-            <p className="text-gray-400">Power Output</p>
-            <h2 className="text-white font-bold">{latest.power_out} kW</h2>
-          </div>
-          <div className="bg-gray-800 p-4 rounded text-center">
-            <p className="text-gray-400">Rotor Speed</p>
-            <h2 className="text-white font-bold">{latest.rotor_speed} RPM</h2>
-          </div>
-          <div className="bg-gray-800 p-4 rounded text-center">
-            <p className="text-gray-400">Pitch Angle</p>
-            <h2 className="text-white font-bold">{latest.pitch_angle}°</h2>
-          </div>
-        </div>
-      )}
+     {latest && (
+  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div className="bg-gray-800 p-4 rounded text-center">
+      <Volume2 className="mx-auto mb-2 text-blue-400" size={28} />
+      <p className="text-gray-400">Noise Level</p>
+      <h2 className="text-white font-bold">{latest.noise_level} dB</h2>
+    </div>
+
+    <div className="bg-gray-800 p-4 rounded text-center">
+      <Wind className="mx-auto mb-2 text-green-400" size={28} />
+      <p className="text-gray-400">Wind Speed</p>
+      <h2 className="text-white font-bold">{latest.wind_speed} m/s</h2>
+    </div>
+
+    <div className="bg-gray-800 p-4 rounded text-center">
+      <Compass className="mx-auto mb-2 text-yellow-400" size={28} />
+      <p className="text-gray-400">Wind Direction</p>
+      <h2 className="text-white font-bold">{latest.wind_direction}°</h2>
+    </div>
+
+    <div className="bg-gray-800 p-4 rounded text-center">
+      <Zap className="mx-auto mb-2 text-purple-400" size={28} />
+      <p className="text-gray-400">Power Output</p>
+      <h2 className="text-white font-bold">{latest.power_out} kW</h2>
+    </div>
+
+    <div className="bg-gray-800 p-4 rounded text-center">
+      <Gauge className="mx-auto mb-2 text-red-400" size={28} />
+      <p className="text-gray-400">Rotor Speed</p>
+      <h2 className="text-white font-bold">{latest.rotor_speed} RPM</h2>
+    </div>
+
+    <div className="bg-gray-800 p-4 rounded text-center">
+      <Move className="mx-auto mb-2 text-pink-400" size={28} />
+      <p className="text-gray-400">Pitch Angle</p>
+      <h2 className="text-white font-bold">{latest.pitch_angle}°</h2>
+    </div>
+  </div>
+)}
 
       {/* Multi-Series Line Chart */}
 

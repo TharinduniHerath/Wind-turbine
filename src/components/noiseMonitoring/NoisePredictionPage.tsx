@@ -4,7 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import TurbineModel from "../Turbine3DModelV2/WindTurbine"; // Adjust path as needed
 import { useTurbineStore } from "../../store/turbineStore"; // import your store hook
-import { Zap, Wind, Thermometer, Cpu } from "lucide-react";
+import { Volume2, Wind, Compass, Zap, Gauge, Move } from "lucide-react";
 
 interface PredictionResult {
   pitch_angle: number;
@@ -125,9 +125,10 @@ const PredictionPage: React.FC = () => {
       <h2 className="text-xl font-semibold mb-4">Prediction Results</h2>
 
       {/* Card-style grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+  {/* Noise Level */}
   <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
-    <Wind className="text-white mb-2" size={24} />
+    <Volume2 className="mb-2 text-blue-400" size={28} />
     <p className="text-gray-400">Noise Level</p>
     <h2 className="text-white font-bold">
       {prediction.noise_level !== undefined
@@ -137,8 +138,23 @@ const PredictionPage: React.FC = () => {
     </h2>
   </div>
 
+  
+
+  {/* Power Output */}
   <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
-    <Zap className="text-white mb-2" size={24} />
+    <Zap className="mb-2 text-purple-400" size={28} />
+    <p className="text-gray-400">Power Output</p>
+    <h2 className="text-white font-bold">
+      {prediction.power_out !== undefined
+        ? prediction.power_out.toFixed(2)
+        : "N/A"}{" "}
+      kW
+    </h2>
+  </div>
+
+  {/* Rotor Speed */}
+  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+    <Gauge className="mb-2 text-red-400" size={28} />
     <p className="text-gray-400">Rotor Speed</p>
     <h2 className="text-white font-bold">
       {prediction.rotor_speed !== undefined
@@ -148,24 +164,15 @@ const PredictionPage: React.FC = () => {
     </h2>
   </div>
 
+  {/* Pitch Angle */}
   <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
-    <Thermometer className="text-white mb-2" size={24} />
+    <Move className="mb-2 text-pink-400" size={28} />
     <p className="text-gray-400">Pitch Angle</p>
     <h2 className="text-white font-bold">
       {prediction.pitch_angle !== undefined
         ? prediction.pitch_angle.toFixed(2)
-        : "N/A"}°
-    </h2>
-  </div>
-
-  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
-    <Cpu className="text-white mb-2" size={24} />
-    <p className="text-gray-400">Power Output</p>
-    <h2 className="text-white font-bold">
-      {prediction.power_out !== undefined
-        ? prediction.power_out.toFixed(2)
         : "N/A"}{" "}
-      kW
+      °
     </h2>
   </div>
 </div>
