@@ -14,7 +14,7 @@ MODEL_DIR = "../models"
 models_info = {
     "Linear": {"model": "linear_model.pkl", "scaler": "scaler_linear_model.pkl"},
     "MLP": {"model": "mlp_model.pkl", "scaler": "scaler_mlp_model.pkl"},
-    "RandomForest": {"model": "rf_model.pkl", "scaler": None},  # tree-based may not need scaler
+    "RandomForest": {"model": "rf_model_physics_aware.pkl", "scaler": None},  # tree-based may not need scaler
     "XGBoost": {"model": "xgb_model.pkl", "scaler": None},
 }
 
