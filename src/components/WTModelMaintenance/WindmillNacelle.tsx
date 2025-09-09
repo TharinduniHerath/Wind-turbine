@@ -206,6 +206,19 @@ export default function WindmillNacelle({
         <meshStandardMaterial color="#ffaa00" />
       </mesh>
 
+      {/* Power Electronics */}
+      <mesh
+        position={[0.45, 0, -0.5]}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          handleHover("Power Electronics", e.object);
+        }}
+        onPointerOut={() => setHoveredPart(null)}
+      >
+        <boxGeometry args={[0.1, 0.3, 0.5]} />
+        <meshStandardMaterial color="#E65100" />
+      </mesh>
+
       {/* Danger Light */}
       <group
         position={[0, 0.6, -1.2]}
@@ -418,6 +431,25 @@ export default function WindmillNacelle({
           }}
         >
           Controller
+        </div>
+      </Html>
+
+      {/* Power Electronics Label */}
+      <Html position={[0.6, 0.2, -0.5]} center sprite>
+        <div
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            background: "rgba(230,81,0,0.9)",
+            padding: "3px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+            border: "1px solid rgba(255,255,255,0.3)",
+            textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+          }}
+        >
+          Power Electronics
         </div>
       </Html>
 
