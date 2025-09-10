@@ -1,0 +1,17 @@
+{
+  "total_records": 52705,
+  "total_features": 104,
+  "date_range": {
+    "start": "2024-01-01T00:00:00",
+    "end": "2025-01-01T00:00:00",
+    "duration_days": 366
+  },
+  "missing_data": {
+    "total_missing": 0,
+    "missing_percentage": 0.0
+  },
+  "feature_types": {
+    "numeric": 94,
+    "categorical": 10
+  }
+}
