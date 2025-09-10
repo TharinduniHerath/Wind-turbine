@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useNoiseStore } from "../../store/noiseStore";
 import TurbineModel from "../Turbine3DModelV2/WindTurbine";
+import BladePitchVisualizer from "../Turbine3DModelV2/BladePitchVisualizer";
 import { OrbitControls,Sky } from "@react-three/drei";
 import { Volume2, Wind, Compass, Zap, Gauge, Move } from "lucide-react";
 
@@ -165,18 +166,29 @@ const NoiseMonitoring: React.FC = () => {
           />
           <OrbitControls />
         </Canvas>
+{latest && (
+  <div className="absolute top-4 right-4 z-50  text-black">
+    <BladePitchVisualizer
+      pitch={latest.pitch_angle}
+      style={{
+        width: '250px',
+        height: '250px',
+      }}
+    />
+  </div>
+)}
 
-        {/* ✅ HUD fixed bottom-left */}
-        {latest && (
-          <div className="absolute top-4 left-4 bg-black/70 text-white p-3 rounded-lg text-xs space-y-1 shadow-md">
-            <p><strong>Wind Speed:</strong> {latest.wind_speed} m/s</p>
-            <p><strong>Wind Dir:</strong> {latest.wind_direction}°</p>
-            <p><strong>Noise:</strong> {latest.noise_level} dB</p>
-            <p><strong>Pitch:</strong> {latest.pitch_angle}°</p>
-            <p><strong>Power:</strong> {latest.power_out} kW</p>
-            <p><strong>RPM:</strong> {latest.rotor_speed}</p>
-          </div>
-        )}
+{/* Bottom-left HUD */}
+{latest && (
+  <div className="absolute top-4 left-4 bg-black/70 text-white p-3 rounded-lg text-xs space-y-1 shadow-md">
+    <p><strong>Wind Speed:</strong> {latest.wind_speed} m/s</p>
+    <p><strong>Wind Dir:</strong> {latest.wind_direction}°</p>
+    <p><strong>Noise:</strong> {latest.noise_level} dB</p>
+    <p><strong>Pitch:</strong> {latest.pitch_angle}°</p>
+    <p><strong>Power:</strong> {latest.power_out} kW</p>
+    <p><strong>RPM:</strong> {latest.rotor_speed}</p>
+  </div>
+)}
       </div>
     </div>
   );
