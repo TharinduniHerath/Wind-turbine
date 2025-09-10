@@ -111,36 +111,42 @@ const FutureNoisePrediction: React.FC = () => {
       ) : predictions.length === 0 ? (
         <p className="text-gray-400">No prediction data available.</p>
       ) : (
-        <div className="overflow-x-auto mb-6">
-          <div className="max-h-96 overflow-y-auto">
-            <table className="min-w-full bg-gray-800 rounded-xl">
-              <thead className="sticky top-0 bg-gray-900 z-10">
-                <tr>
-                  <th className="px-4 py-2">Time</th>
-                  <th className="px-4 py-2">Wind Speed (m/s)</th>
-                  <th className="px-4 py-2">Wind Direction (°)</th>
-                  <th className="px-4 py-2">Pitch Angle (°)</th>
-                  <th className="px-4 py-2">Noise (dB)</th>
-                  <th className="px-4 py-2">Rotor Speed (RPM)</th>
-                  {/* <th className="px-4 py-2">Power (kW)</th> */}
-                </tr>
-              </thead>
-              <tbody>
-                {predictions.map((p, idx) => (
-                  <tr key={idx} className="border-t border-gray-700">
-                    <td className="px-4 py-2">{p.timestamp}</td>
-                    <td className="px-4 py-2">{p.wind_speed}</td>
-                    <td className="px-4 py-2">{p.wind_direction}</td>
-                    <td className="px-4 py-2">{p.best_pitch_angle}</td>
-                    <td className="px-4 py-2">{p.predicted_noise}</td>
-                    <td className="px-4 py-2">{p.predicted_rpm}</td>
-                    {/* <td className="px-4 py-2">{p.predicted_power}</td> */}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+       <div className="overflow-x-auto mb-6">
+  <div className="max-h-96 overflow-y-auto">
+    <table className="min-w-full bg-gray-800 rounded-xl">
+      <thead className="sticky top-0 bg-gray-900 z-10">
+        <tr>
+          <th className="px-4 py-2 text-center">Time</th>
+          <th className="px-4 py-2 text-center">Wind Speed (m/s)</th>
+          <th className="px-4 py-2 text-center">Wind Direction (°)</th>
+          <th className="px-4 py-2 text-center">Pitch Angle (°)</th>
+          <th className="px-4 py-2 text-center">Noise (dB)</th>
+          <th className="px-4 py-2 text-center">Rotor Speed (RPM)</th>
+          {/* <th className="px-4 py-2 text-center">Power (kW)</th> */}
+        </tr>
+      </thead>
+      <tbody>
+        {predictions.map((p, idx) => (
+          <tr
+            key={idx}
+            className={`border-t border-gray-700 ${
+              idx % 2 === 0 ? "bg-gray-800" : "bg-gray-700"
+            }`}
+          >
+            <td className="px-4 py-2 text-center">{p.timestamp}</td>
+            <td className="px-4 py-2 text-center">{p.wind_speed}</td>
+            <td className="px-4 py-2 text-center">{p.wind_direction}</td>
+            <td className="px-4 py-2 text-center">{p.best_pitch_angle}</td>
+            <td className="px-4 py-2 text-center">{p.predicted_noise}</td>
+            <td className="px-4 py-2 text-center">{p.predicted_rpm}</td>
+            {/* <td className="px-4 py-2 text-center">{p.predicted_power}</td> */}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
       )}
     </div>
   );
