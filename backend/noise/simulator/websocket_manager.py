@@ -143,6 +143,20 @@ class WebSocketManager:
         await websocket.accept()
         self.active_connections.append(websocket)
         print(f"✅ Client connected: {websocket.client}")
+        
+          # Send the latest row immediately to new client
+        if self.row_index < len(self.df):
+            row = self.df.iloc[self.row_index]
+            data_point = {
+            "noise_level": round(float(row['noise level']), 2),
+            "wind_speed": round(float(row['WindSpeed at 80m']), 2),
+            "wind_direction": round(float(row['Wind Direction']), 2),
+            "power_out": round(float(row['power out']), 2),
+            "rotor_speed": round(float(row['Rotor Speed']), 2),
+            "pitch_angle": round(float(row['pitch angle']), 2),
+            "timestamp": time.time()
+        }
+        await websocket.send_text(json.dumps(data_point))
 
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:

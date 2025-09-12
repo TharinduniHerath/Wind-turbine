@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import TurbineModel from "../Turbine3DModelV2/WindTurbine"; // Adjust path as needed
 import { useTurbineStore } from "../../store/turbineStore"; // import your store hook
+import { Volume2, Wind, Compass, Zap, Gauge, Move } from "lucide-react";
 
 interface PredictionResult {
   pitch_angle: number;
@@ -14,7 +15,7 @@ interface PredictionResult {
 const PredictionPage: React.FC = () => {
   const [windSpeed, setWindSpeed] = useState("");
   const [windDirection, setWindDirection] = useState("");
-  const [targetNoiseLevel, setTargetNoiseLevel] = useState("35");
+  const [targetNoiseLevel, setTargetNoiseLevel] = useState("50");
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -54,7 +55,7 @@ const PredictionPage: React.FC = () => {
       {/* Header with title and Live button */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Predict Noise & Turbine Behavior</h1>
-          <div className="space-x-2">
+          <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
         <button
           onClick={() => setActiveModule('noise')}
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow"
@@ -99,7 +100,7 @@ const PredictionPage: React.FC = () => {
             value={targetNoiseLevel}
             onChange={(e) => setTargetNoiseLevel(e.target.value)}
             className="w-full p-2 rounded bg-white text-black"
-            placeholder="e.g. 35"
+            placeholder="e.g. 50"
           />
         </div>
       </div>
@@ -124,46 +125,57 @@ const PredictionPage: React.FC = () => {
       <h2 className="text-xl font-semibold mb-4">Prediction Results</h2>
 
       {/* Card-style grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        <div className="bg-gray-800 p-4 rounded text-center">
-          <p className="text-gray-400">Noise Level</p>
-          <h2 className="text-white font-bold">
-            {prediction.noise_level !== undefined
-              ? prediction.noise_level.toFixed(2)
-              : "N/A"}{" "}
-            dB
-          </h2>
-        </div>
+     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+  {/* Noise Level */}
+  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+    <Volume2 className="mb-2 text-blue-400" size={28} />
+    <p className="text-gray-400">Noise Level</p>
+    <h2 className="text-white font-bold">
+      {prediction.noise_level !== undefined
+        ? prediction.noise_level.toFixed(2)
+        : "N/A"}{" "}
+      dB
+    </h2>
+  </div>
 
-        <div className="bg-gray-800 p-4 rounded text-center">
-          <p className="text-gray-400">Rotor Speed</p>
-          <h2 className="text-white font-bold">
-            {prediction.rotor_speed !== undefined
-              ? prediction.rotor_speed.toFixed(2)
-              : "N/A"}{" "}
-            RPM
-          </h2>
-        </div>
+  
 
-        <div className="bg-gray-800 p-4 rounded text-center">
-          <p className="text-gray-400">Pitch Angle</p>
-          <h2 className="text-white font-bold">
-            {prediction.pitch_angle !== undefined
-              ? prediction.pitch_angle.toFixed(2)
-              : "N/A"}°
-          </h2>
-        </div>
+  {/* Power Output */}
+  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+    <Zap className="mb-2 text-purple-400" size={28} />
+    <p className="text-gray-400">Power Output</p>
+    <h2 className="text-white font-bold">
+      {prediction.power_out !== undefined
+        ? prediction.power_out.toFixed(2)
+        : "N/A"}{" "}
+      kW
+    </h2>
+  </div>
 
-        <div className="bg-gray-800 p-4 rounded text-center">
-          <p className="text-gray-400">Power Output</p>
-          <h2 className="text-white font-bold">
-            {prediction.power_out !== undefined
-              ? prediction.power_out.toFixed(2)
-              : "N/A"}{" "}
-            kW
-          </h2>
-        </div>
-      </div>
+  {/* Rotor Speed */}
+  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+    <Gauge className="mb-2 text-red-400" size={28} />
+    <p className="text-gray-400">Rotor Speed</p>
+    <h2 className="text-white font-bold">
+      {prediction.rotor_speed !== undefined
+        ? prediction.rotor_speed.toFixed(2)
+        : "N/A"}{" "}
+      RPM
+    </h2>
+  </div>
+
+  {/* Pitch Angle */}
+  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+    <Move className="mb-2 text-pink-400" size={28} />
+    <p className="text-gray-400">Pitch Angle</p>
+    <h2 className="text-white font-bold">
+      {prediction.pitch_angle !== undefined
+        ? prediction.pitch_angle.toFixed(2)
+        : "N/A"}{" "}
+      °
+    </h2>
+  </div>
+</div>
     </div>
 
     {/* Turbine canvas */}

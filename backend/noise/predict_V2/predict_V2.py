@@ -6,7 +6,7 @@ import os
 
 # --- Config ---  
 MODEL_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "models", "rf_model.pkl")
+    os.path.join(os.path.dirname(__file__), "..", "models", "rf_model_physics_aware.pkl")
 )
 
 CUT_IN = 3.0
@@ -24,23 +24,30 @@ if not os.path.exists(MODEL_PATH):
 model = joblib.load(MODEL_PATH)
 
 # --- Physics guard ---
+
 def physics_guard(preds, wind_speed):
     y = preds.copy().astype(float)
-    # Cut-in wind: no power, no rpm
+    
+    # Ensure wind_speed is an array
+    wind_speed = np.array([wind_speed]) if np.isscalar(wind_speed) else np.array(wind_speed)
+
+    # Cut-in wind: no power, no rpm, no noise
     stopped = wind_speed < CUT_IN
     y[stopped, 0] = 0.0  # power out
     y[stopped, 1] = 0.0  # rotor speed
+    y[stopped, 2] = 0.0  # noise level
 
-    # Cut-out wind: no power, no rpm
+    # Cut-out wind: no power, no rpm, no noise
     over = wind_speed >= CUT_OUT
     y[over, 0] = 0.0
     y[over, 1] = 0.0
+    y[over, 2] = 0.0
 
     # Rated wind: cap power
     rated_zone = (wind_speed >= RATED) & (wind_speed < CUT_OUT)
     y[rated_zone, 0] = np.minimum(y[rated_zone, 0], RATED_POWER)
-    return y
 
+    return y
 # --- Main function to recommend pitch ---
 def recommend_pitch_with_noise(wind_speed: float, wind_dir: float, target_noise: float):
     pitch_angles = np.arange(PITCH_MIN, PITCH_MAX + PITCH_STEP, PITCH_STEP)
@@ -79,7 +86,7 @@ def recommend_pitch_with_noise(wind_speed: float, wind_dir: float, target_noise:
 
 # --- Example usage ---
 if __name__ == "__main__":
-    wind_speed = 25.0       # m/s
+    wind_speed = 0.0       # m/s
     wind_dir = 180          # degrees
     required_noise = 40.0   # dB
 
