@@ -4,14 +4,14 @@ import { useTurbineStore } from './store/turbineStore';
 import { generateMockTurbineData } from './data/mockData';
 import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar';
-import Overview from './components/Modules/Overview';
+//import Overview from './components/Modules/Overview';
 import NoiseMonitoring from './components/noiseMonitoring/NoiseMonitoring';
 import PowerOptimization from './components/Modules/PowerOptimization';
 import WeatherImpact from './components/weather_impact/WeatherImpact';
 import Maintenance from './components/maintenanceMonitoring/Maintenance';
 import NoisePredictionPage from "./components/noiseMonitoring/NoisePredictionPage";
 import FutureNoisePrediction from "./components/noiseMonitoring/FuturePrediction";
-
+import Overview from './components/overView/Overview';
 
 function App() {
   const { 

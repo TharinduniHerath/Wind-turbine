@@ -182,7 +182,7 @@ const PredictionPage: React.FC = () => {
     {/* Turbine canvas */}
  {/* Turbine canvas container */}
 <div className="mt-8 h-[500px] border rounded bg-gray-900 relative"> {/* <-- make relative */}
-  <Canvas camera={{ position: [0, 8, 20], fov: 45 }}>
+  <Canvas camera={{ position: [0, 20, 50], fov: 45 }}>
     <color attach="background" args={["lightblue"]} />
              <Sky sunPosition={[100, 20, 10]} />
              <ambientLight intensity={0.5} />

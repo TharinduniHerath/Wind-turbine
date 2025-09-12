@@ -152,7 +152,7 @@ const NoiseMonitoring: React.FC = () => {
 
       {/* 3D Turbine Model */}
        <div className="h-[500px] mt-6 border rounded bg-gray-900 relative">
-        <Canvas camera={{ position: [0, 5, 10], fov: 50 }}>
+        <Canvas camera={{ position: [0, 20, 50], fov: 50 }}>
           <color attach="background" args={["lightblue"]} />
           <Sky sunPosition={[100, 20, 10]} />
           <ambientLight intensity={0.5} />
