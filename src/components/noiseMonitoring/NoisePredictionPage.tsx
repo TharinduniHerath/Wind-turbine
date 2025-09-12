@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Canvas } from "@react-three/fiber";
+<<<<<<< HEAD
 import { OrbitControls } from "@react-three/drei";
 import TurbineModel from "../Turbine3DModelV2/WindTurbine"; // Adjust path as needed
+=======
+import { OrbitControls,Sky } from "@react-three/drei";
+import TurbineModel from "../Turbine3DModelV2/WindTurbine"; // Adjust path as needed
+import BladePitchVisualizer from "../Turbine3DModelV2/BladePitchVisualizer";
+>>>>>>> 91ea8b1f32dd8ac2ca52154fa122ad0423676d40
 import { useTurbineStore } from "../../store/turbineStore"; // import your store hook
 import { Volume2, Wind, Compass, Zap, Gauge, Move } from "lucide-react";
 
@@ -179,6 +185,7 @@ const PredictionPage: React.FC = () => {
     </div>
 
     {/* Turbine canvas */}
+<<<<<<< HEAD
     <div className="mt-8 h-[500px] border rounded bg-gray-900">
       <Canvas camera={{ position: [0, 8, 20], fov: 45 }}>
         <ambientLight intensity={0.5} />
@@ -194,6 +201,40 @@ const PredictionPage: React.FC = () => {
         <OrbitControls />
       </Canvas>
     </div>
+=======
+ {/* Turbine canvas container */}
+<div className="mt-8 h-[500px] border rounded bg-gray-900 relative"> {/* <-- make relative */}
+  <Canvas camera={{ position: [0, 8, 20], fov: 45 }}>
+    <color attach="background" args={["lightblue"]} />
+             <Sky sunPosition={[100, 20, 10]} />
+             <ambientLight intensity={0.5} />
+             <directionalLight position={[5, 5, 5]} />
+    <TurbineModel
+      rpm={prediction.rotor_speed}
+      pitch={prediction.pitch_angle}
+      windDirection={parseFloat(windDirection)}
+      windSpeed={parseFloat(windSpeed)}
+      position={[0, -5, 0]}
+      scale={[0.5, 0.5, 0.5]}
+    />
+    <OrbitControls />
+  </Canvas>
+
+  {/* BladePitchVisualizer overlay */}
+  {prediction && (
+    <div className="absolute top-4 right-4 z-50">
+      <BladePitchVisualizer
+        pitch={prediction.pitch_angle}
+        style={{
+          width: '150px', // or whatever size you want
+          height: '150px',
+        }}
+      />
+    </div>
+  )}
+</div>
+
+>>>>>>> 91ea8b1f32dd8ac2ca52154fa122ad0423676d40
   </>
 )}
 

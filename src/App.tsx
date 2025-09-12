@@ -7,7 +7,11 @@ import Sidebar from './components/Layout/Sidebar';
 import Overview from './components/Modules/Overview';
 import NoiseMonitoring from './components/noiseMonitoring/NoiseMonitoring';
 import PowerOptimization from './components/Modules/PowerOptimization';
+<<<<<<< HEAD
 import WeatherImpact from './components/Modules/WeatherImpact';
+=======
+import WeatherImpact from './components/weather_impact/WeatherImpact';
+>>>>>>> 91ea8b1f32dd8ac2ca52154fa122ad0423676d40
 import Maintenance from './components/maintenanceMonitoring/Maintenance';
 import NoisePredictionPage from "./components/noiseMonitoring/NoisePredictionPage";
 import FutureNoisePrediction from "./components/noiseMonitoring/FuturePrediction";

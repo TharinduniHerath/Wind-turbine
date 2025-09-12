@@ -87,7 +87,11 @@ mlp = MLPRegressor(
 )
 
 model = MultiOutputRegressor(mlp)
+<<<<<<< HEAD
 model.fit(X_train_scaled, y_train, sample_weight=weights)
+=======
+model.fit(X_train_scaled, y_train)
+>>>>>>> 91ea8b1f32dd8ac2ca52154fa122ad0423676d40
 
 # --- Predict and apply guard ---
 preds = model.predict(X_test_scaled)

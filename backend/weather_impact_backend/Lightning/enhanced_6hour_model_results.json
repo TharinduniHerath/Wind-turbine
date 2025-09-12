@@ -1,0 +1,660 @@
+{
+  "approach": "enhanced_6hour_model",
+  "features_selected": [
+    "wind_shear_max_normalized",
+    "wind_shear_max",
+    "WS50M_max",
+    "WSC_max",
+    "WS50M_mean",
+    "WSC_mean",
+    "WS10M_mean",
+    "WS10M_max",
+    "moisture_flux_mean",
+    "wind_shear_mean",
+    "moisture_flux_max",
+    "combined_risk_score_mean",
+    "moderate_rain_indicator",
+    "is_transition_month_max",
+    "high_risk_months_max",
+    "is_peak_season",
+    "combined_risk_score_max",
+    "composite_instability_index",
+    "heavy_rain_indicator",
+    "T2MWET_mean",
+    "PRECTOTCORR_sum",
+    "has_precipitation_sum",
+    "PRECTOTCORR_max",
+    "T2M_mean",
+    "convective_potential_max",
+    "convective_potential_max_normalized",
+    "wind_strong_sum",
+    "QV2M_mean",
+    "T2MDEW_mean",
+    "hour_cos_mean"
+  ],
+  "models_trained": [
+    "Enhanced_RF",
+    "Extra_Trees",
+    "Enhanced_XGB"
+  ],
+  "performance_results": {
+    "Enhanced_RF": [
+      {
+        "threshold": 0.005,
+        "recall": 0.9,
+        "precision": 0.02258469259723965,
+        "f1": 0.044063647490820076,
+        "auc": 0.7909375,
+        "total_cost": 409500,
+        "warning_rate": 0.5458904109589041,
+        "lightning_caught": 18,
+        "missed_lightning": 2,
+        "false_alarms": 779
+      },
+      {
+        "threshold": 0.01,
+        "recall": 0.9,
+        "precision": 0.028892455858747994,
+        "f1": 0.05598755832037325,
+        "auc": 0.7909375,
+        "total_cost": 322500,
+        "warning_rate": 0.4267123287671233,
+        "lightning_caught": 18,
+        "missed_lightning": 2,
+        "false_alarms": 605
+      },
+      {
+        "threshold": 0.02,
+        "recall": 0.85,
+        "precision": 0.03736263736263736,
+        "f1": 0.07157894736842105,
+        "auc": 0.7909375,
+        "total_cost": 249000,
+        "warning_rate": 0.3116438356164384,
+        "lightning_caught": 17,
+        "missed_lightning": 3,
+        "false_alarms": 438
+      },
+      {
+        "threshold": 0.03,
+        "recall": 0.6,
+        "precision": 0.03582089552238806,
+        "f1": 0.0676056338028169,
+        "auc": 0.7909375,
+        "total_cost": 241500,
+        "warning_rate": 0.22945205479452055,
+        "lightning_caught": 12,
+        "missed_lightning": 8,
+        "false_alarms": 323
+      },
+      {
+        "threshold": 0.05,
+        "recall": 0.6,
+        "precision": 0.05660377358490566,
+        "f1": 0.10344827586206896,
+        "auc": 0.7909375,
+        "total_cost": 180000,
+        "warning_rate": 0.14520547945205478,
+        "lightning_caught": 12,
+        "missed_lightning": 8,
+        "false_alarms": 200
+      },
+      {
+        "threshold": 0.08,
+        "recall": 0.25,
+        "precision": 0.0390625,
+        "f1": 0.06756756756756757,
+        "auc": 0.7909375,
+        "total_cost": 211500,
+        "warning_rate": 0.08767123287671233,
+        "lightning_caught": 5,
+        "missed_lightning": 15,
+        "false_alarms": 123
+      },
+      {
+        "threshold": 0.1,
+        "recall": 0.2,
+        "precision": 0.039603960396039604,
+        "f1": 0.06611570247933884,
+        "auc": 0.7909375,
+        "total_cost": 208500,
+        "warning_rate": 0.06917808219178082,
+        "lightning_caught": 4,
+        "missed_lightning": 16,
+        "false_alarms": 97
+      },
+      {
+        "threshold": 0.15,
+        "recall": 0.15,
+        "precision": 0.04918032786885246,
+        "f1": 0.07407407407407407,
+        "auc": 0.7909375,
+        "total_cost": 199000,
+        "warning_rate": 0.04178082191780822,
+        "lightning_caught": 3,
+        "missed_lightning": 17,
+        "false_alarms": 58
+      },
+      {
+        "threshold": 0.2,
+        "recall": 0.0,
+        "precision": 0.0,
+        "f1": 0.0,
+        "auc": 0.7909375,
+        "total_cost": 211000,
+        "warning_rate": 0.015068493150684932,
+        "lightning_caught": 0,
+        "missed_lightning": 20,
+        "false_alarms": 22
+      },
+      {
+        "threshold": 0.3,
+        "recall": 0.0,
+        "precision": 0.0,
+        "f1": 0.0,
+        "auc": 0.7909375,
+        "total_cost": 202000,
+        "warning_rate": 0.0027397260273972603,
+        "lightning_caught": 0,
+        "missed_lightning": 20,
+        "false_alarms": 4
+      }
+    ],
+    "Extra_Trees": [
+      {
+        "threshold": 0.005,
+        "recall": 0.95,
+        "precision": 0.01973001038421599,
+        "f1": 0.038657171922685654,
+        "auc": 0.7607465277777777,
+        "total_cost": 482000,
+        "warning_rate": 0.6595890410958904,
+        "lightning_caught": 19,
+        "missed_lightning": 1,
+        "false_alarms": 944
+      },
+      {
+        "threshold": 0.01,
+        "recall": 0.9,
+        "precision": 0.02236024844720497,
+        "f1": 0.04363636363636364,
+        "auc": 0.7607465277777777,
+        "total_cost": 413500,
+        "warning_rate": 0.5513698630136986,
+        "lightning_caught": 18,
+        "missed_lightning": 2,
+        "false_alarms": 787
+      },
+      {
+        "threshold": 0.02,
+        "recall": 0.85,
+        "precision": 0.02750809061488673,
+        "f1": 0.05329153605015674,
+        "auc": 0.7607465277777777,
+        "total_cost": 330500,
+        "warning_rate": 0.4232876712328767,
+        "lightning_caught": 17,
+        "missed_lightning": 3,
+        "false_alarms": 601
+      },
+      {
+        "threshold": 0.03,
+        "recall": 0.85,
+        "precision": 0.034552845528455285,
+        "f1": 0.06640625,
+        "auc": 0.7607465277777777,
+        "total_cost": 267500,
+        "warning_rate": 0.336986301369863,
+        "lightning_caught": 17,
+        "missed_lightning": 3,
+        "false_alarms": 475
+      },
+      {
+        "threshold": 0.05,
+        "recall": 0.65,
+        "precision": 0.03939393939393939,
+        "f1": 0.07428571428571429,
+        "auc": 0.7607465277777777,
+        "total_cost": 228500,
+        "warning_rate": 0.22602739726027396,
+        "lightning_caught": 13,
+        "missed_lightning": 7,
+        "false_alarms": 317
+      },
+      {
+        "threshold": 0.08,
+        "recall": 0.3,
+        "precision": 0.02857142857142857,
+        "f1": 0.05217391304347826,
+        "auc": 0.7607465277777777,
+        "total_cost": 242000,
+        "warning_rate": 0.14383561643835616,
+        "lightning_caught": 6,
+        "missed_lightning": 14,
+        "false_alarms": 204
+      },
+      {
+        "threshold": 0.1,
+        "recall": 0.25,
+        "precision": 0.03164556962025317,
+        "f1": 0.056179775280898875,
+        "auc": 0.7607465277777777,
+        "total_cost": 226500,
+        "warning_rate": 0.10821917808219178,
+        "lightning_caught": 5,
+        "missed_lightning": 15,
+        "false_alarms": 153
+      },
+      {
+        "threshold": 0.15,
+        "recall": 0.25,
+        "precision": 0.05747126436781609,
+        "f1": 0.09345794392523364,
+        "auc": 0.7607465277777777,
+        "total_cost": 191000,
+        "warning_rate": 0.05958904109589041,
+        "lightning_caught": 5,
+        "missed_lightning": 15,
+        "false_alarms": 82
+      },
+      {
+        "threshold": 0.2,
+        "recall": 0.1,
+        "precision": 0.038461538461538464,
+        "f1": 0.05555555555555555,
+        "auc": 0.7607465277777777,
+        "total_cost": 205000,
+        "warning_rate": 0.03561643835616438,
+        "lightning_caught": 2,
+        "missed_lightning": 18,
+        "false_alarms": 50
+      },
+      {
+        "threshold": 0.3,
+        "recall": 0.0,
+        "precision": 0.0,
+        "f1": 0.0,
+        "auc": 0.7607465277777777,
+        "total_cost": 207000,
+        "warning_rate": 0.009589041095890411,
+        "lightning_caught": 0,
+        "missed_lightning": 20,
+        "false_alarms": 14
+      }
+    ],
+    "Enhanced_XGB": [
+      {
+        "threshold": 0.005,
+        "recall": 0.4,
+        "precision": 0.037914691943127965,
+        "f1": 0.06926406926406926,
+        "auc": 0.7649652777777778,
+        "total_cost": 221500,
+        "warning_rate": 0.14452054794520547,
+        "lightning_caught": 8,
+        "missed_lightning": 12,
+        "false_alarms": 203
+      },
+      {
+        "threshold": 0.01,
+        "recall": 0.35,
+        "precision": 0.04487179487179487,
+        "f1": 0.07954545454545454,
+        "auc": 0.7649652777777778,
+        "total_cost": 204500,
+        "warning_rate": 0.10684931506849316,
+        "lightning_caught": 7,
+        "missed_lightning": 13,
+        "false_alarms": 149
+      },
+      {
+        "threshold": 0.02,
+        "recall": 0.2,
+        "precision": 0.038461538461538464,
+        "f1": 0.06451612903225806,
+        "auc": 0.7649652777777778,
+        "total_cost": 210000,
+        "warning_rate": 0.07123287671232877,
+        "lightning_caught": 4,
+        "missed_lightning": 16,
+        "false_alarms": 100
+      },
+      {
+        "threshold": 0.03,
+        "recall": 0.15,
+        "precision": 0.03260869565217391,
+        "f1": 0.05357142857142857,
+        "auc": 0.7649652777777778,
+        "total_cost": 214500,
+        "warning_rate": 0.06301369863013699,
+        "lightning_caught": 3,
+        "missed_lightning": 17,
+        "false_alarms": 89
+      },
+      {
+        "threshold": 0.05,
+        "recall": 0.15,
+        "precision": 0.04225352112676056,
+        "f1": 0.06593406593406594,
+        "auc": 0.7649652777777778,
+        "total_cost": 204000,
+        "warning_rate": 0.04863013698630137,
+        "lightning_caught": 3,
+        "missed_lightning": 17,
+        "false_alarms": 68
+      },
+      {
+        "threshold": 0.08,
+        "recall": 0.1,
+        "precision": 0.04,
+        "f1": 0.05714285714285714,
+        "auc": 0.7649652777777778,
+        "total_cost": 204000,
+        "warning_rate": 0.03424657534246575,
+        "lightning_caught": 2,
+        "missed_lightning": 18,
+        "false_alarms": 48
+      },
+      {
+        "threshold": 0.1,
+        "recall": 0.05,
+        "precision": 0.022222222222222223,
+        "f1": 0.03076923076923077,
+        "auc": 0.7649652777777778,
+        "total_cost": 212000,
+        "warning_rate": 0.030821917808219176,
+        "lightning_caught": 1,
+        "missed_lightning": 19,
+        "false_alarms": 44
+      },
+      {
+        "threshold": 0.15,
+        "recall": 0.0,
+        "precision": 0.0,
+        "f1": 0.0,
+        "auc": 0.7649652777777778,
+        "total_cost": 217500,
+        "warning_rate": 0.023972602739726026,
+        "lightning_caught": 0,
+        "missed_lightning": 20,
+        "false_alarms": 35
+      },
+      {
+        "threshold": 0.2,
+        "recall": 0.0,
+        "precision": 0.0,
+        "f1": 0.0,
+        "auc": 0.7649652777777778,
+        "total_cost": 212500,
+        "warning_rate": 0.017123287671232876,
+        "lightning_caught": 0,
+        "missed_lightning": 20,
+        "false_alarms": 25
+      },
+      {
+        "threshold": 0.3,
+        "recall": 0.0,
+        "precision": 0.0,
+        "f1": 0.0,
+        "auc": 0.7649652777777778,
+        "total_cost": 207500,
+        "warning_rate": 0.010273972602739725,
+        "lightning_caught": 0,
+        "missed_lightning": 20,
+        "false_alarms": 15
+      }
+    ]
+  },
+  "best_configurations": {
+    "Enhanced_RF": {
+      "best_recall": {
+        "threshold": 0.005,
+        "recall": 0.9,
+        "precision": 0.02258469259723965,
+        "f1": 0.044063647490820076,
+        "auc": 0.7909375,
+        "total_cost": 409500,
+        "warning_rate": 0.5458904109589041,
+        "lightning_caught": 18,
+        "missed_lightning": 2,
+        "false_alarms": 779
+      },
+      "best_cost": {
+        "threshold": 0.05,
+        "recall": 0.6,
+        "precision": 0.05660377358490566,
+        "f1": 0.10344827586206896,
+        "auc": 0.7909375,
+        "total_cost": 180000,
+        "warning_rate": 0.14520547945205478,
+        "lightning_caught": 12,
+        "missed_lightning": 8,
+        "false_alarms": 200
+      },
+      "best_operational": {
+        "threshold": 0.02,
+        "recall": 0.85,
+        "precision": 0.03736263736263736,
+        "f1": 0.07157894736842105,
+        "auc": 0.7909375,
+        "total_cost": 249000,
+        "warning_rate": 0.3116438356164384,
+        "lightning_caught": 17,
+        "missed_lightning": 3,
+        "false_alarms": 438
+      }
+    },
+    "Extra_Trees": {
+      "best_recall": {
+        "threshold": 0.005,
+        "recall": 0.95,
+        "precision": 0.01973001038421599,
+        "f1": 0.038657171922685654,
+        "auc": 0.7607465277777777,
+        "total_cost": 482000,
+        "warning_rate": 0.6595890410958904,
+        "lightning_caught": 19,
+        "missed_lightning": 1,
+        "false_alarms": 944
+      },
+      "best_cost": {
+        "threshold": 0.15,
+        "recall": 0.25,
+        "precision": 0.05747126436781609,
+        "f1": 0.09345794392523364,
+        "auc": 0.7607465277777777,
+        "total_cost": 191000,
+        "warning_rate": 0.05958904109589041,
+        "lightning_caught": 5,
+        "missed_lightning": 15,
+        "false_alarms": 82
+      },
+      "best_operational": {
+        "threshold": 0.03,
+        "recall": 0.85,
+        "precision": 0.034552845528455285,
+        "f1": 0.06640625,
+        "auc": 0.7607465277777777,
+        "total_cost": 267500,
+        "warning_rate": 0.336986301369863,
+        "lightning_caught": 17,
+        "missed_lightning": 3,
+        "false_alarms": 475
+      }
+    },
+    "Enhanced_XGB": {
+      "best_recall": {
+        "threshold": 0.005,
+        "recall": 0.4,
+        "precision": 0.037914691943127965,
+        "f1": 0.06926406926406926,
+        "auc": 0.7649652777777778,
+        "total_cost": 221500,
+        "warning_rate": 0.14452054794520547,
+        "lightning_caught": 8,
+        "missed_lightning": 12,
+        "false_alarms": 203
+      },
+      "best_cost": {
+        "threshold": 0.05,
+        "recall": 0.15,
+        "precision": 0.04225352112676056,
+        "f1": 0.06593406593406594,
+        "auc": 0.7649652777777778,
+        "total_cost": 204000,
+        "warning_rate": 0.04863013698630137,
+        "lightning_caught": 3,
+        "missed_lightning": 17,
+        "false_alarms": 68
+      },
+      "best_operational": null
+    }
+  },
+  "feature_importance": [
+    {
+      "feature": "PRECTOTCORR_max",
+      "importance": 0.08916131052548032
+    },
+    {
+      "feature": "PRECTOTCORR_sum",
+      "importance": 0.08378505287085046
+    },
+    {
+      "feature": "wind_shear_max",
+      "importance": 0.051762672745008426
+    },
+    {
+      "feature": "wind_shear_mean",
+      "importance": 0.04957974378830788
+    },
+    {
+      "feature": "wind_shear_max_normalized",
+      "importance": 0.047779248014150726
+    },
+    {
+      "feature": "composite_instability_index",
+      "importance": 0.047085668321879555
+    },
+    {
+      "feature": "T2MDEW_mean",
+      "importance": 0.046497156413017306
+    },
+    {
+      "feature": "T2MWET_mean",
+      "importance": 0.04541572495355325
+    },
+    {
+      "feature": "WS50M_mean",
+      "importance": 0.044216050968281975
+    },
+    {
+      "feature": "QV2M_mean",
+      "importance": 0.04331330873608469
+    },
+    {
+      "feature": "T2M_mean",
+      "importance": 0.04217623994395265
+    },
+    {
+      "feature": "WSC_mean",
+      "importance": 0.04151478048379907
+    },
+    {
+      "feature": "convective_potential_max_normalized",
+      "importance": 0.03979752579615202
+    },
+    {
+      "feature": "WS10M_mean",
+      "importance": 0.03970694110686359
+    },
+    {
+      "feature": "convective_potential_max",
+      "importance": 0.039253892648701605
+    },
+    {
+      "feature": "moisture_flux_mean",
+      "importance": 0.03600100862036545
+    },
+    {
+      "feature": "WS50M_max",
+      "importance": 0.03512864568782627
+    },
+    {
+      "feature": "WSC_max",
+      "importance": 0.033323574745854505
+    },
+    {
+      "feature": "moisture_flux_max",
+      "importance": 0.03289632832472037
+    },
+    {
+      "feature": "WS10M_max",
+      "importance": 0.02978774024922954
+    },
+    {
+      "feature": "combined_risk_score_mean",
+      "importance": 0.027112679078556225
+    },
+    {
+      "feature": "combined_risk_score_max",
+      "importance": 0.012597856982122332
+    },
+    {
+      "feature": "hour_cos_mean",
+      "importance": 0.012279162792751926
+    },
+    {
+      "feature": "heavy_rain_indicator",
+      "importance": 0.008180205765626771
+    },
+    {
+      "feature": "moderate_rain_indicator",
+      "importance": 0.007052531092449229
+    },
+    {
+      "feature": "has_precipitation_sum",
+      "importance": 0.0056358530856720004
+    },
+    {
+      "feature": "is_transition_month_max",
+      "importance": 0.003170725993100365
+    },
+    {
+      "feature": "is_peak_season",
+      "importance": 0.002561193600011182
+    },
+    {
+      "feature": "high_risk_months_max",
+      "importance": 0.002546648273016199
+    },
+    {
+      "feature": "wind_strong_sum",
+      "importance": 0.0006805283926139904
+    }
+  ],
+  "comparison_with_previous": {
+    "previous_best": {
+      "recall": 0.95,
+      "precision": 0.021,
+      "warning_rate": 0.63
+    },
+    "enhanced_best": {}
+  },
+  "training_summary": {
+    "training_samples": 5843,
+    "training_lightning": 79,
+    "test_samples": 1460,
+    "test_lightning": 20,
+    "features_used": 30
+  },
+  "recommended_model": {
+    "model": "Enhanced_RF",
+    "threshold": 0.02,
+    "performance": {
+      "recall": 0.85,
+      "precision": 0.03736263736263736,
+      "warning_rate": 0.3116438356164384,
+      "annual_cost": 249000
+    }
+  }
+}
