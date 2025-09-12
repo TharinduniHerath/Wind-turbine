@@ -30,7 +30,7 @@ const FutureNoisePrediction: React.FC = () => {
   const setActiveModule = useTurbineStore(state => state.setActiveModule);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyD8JLkZIXnhtbCg_ByyafoyfodA-1kr8Ms",
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "",
   });
 
   const fetchPredictions = useCallback(async () => {
