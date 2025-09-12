@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls,Sky } from "@react-three/drei";
-import TurbineModel from "../Turbine3DModelV2/WindTurbine"; // Adjust path as needed
+import { OrbitControls, Sky } from "@react-three/drei";
+import TurbineModel from "../Turbine3DModelV2/WindTurbine"; 
 import BladePitchVisualizer from "../Turbine3DModelV2/BladePitchVisualizer";
-import { useTurbineStore } from "../../store/turbineStore"; // import your store hook
-import { Volume2, Wind, Compass, Zap, Gauge, Move } from "lucide-react";
+import { useTurbineStore } from "../../store/turbineStore";
+import { Volume2, Zap, Gauge, Move, Loader2 } from "lucide-react";
 
 interface PredictionResult {
   pitch_angle: number;
@@ -13,6 +13,7 @@ interface PredictionResult {
   rotor_speed: number;
   power_out: number;
 }
+
 const PredictionPage: React.FC = () => {
   const [windSpeed, setWindSpeed] = useState("");
   const [windDirection, setWindDirection] = useState("");
@@ -21,7 +22,6 @@ const PredictionPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Get setActiveModule from the global store to change active module
   const setActiveModule = useTurbineStore(state => state.setActiveModule);
 
   const handlePredict = async () => {
@@ -52,27 +52,28 @@ const PredictionPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-slate-900 text-white min-h-screen">
-      {/* Header with title and Live button */}
+    <div className="p-6 bg-slate-900 text-white min-h-screen relative">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Predict Noise & Turbine Behavior</h1>
-          <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
-        <button
-          onClick={() => setActiveModule('noise')}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow"
-          type="button"
-        >
-          Live
-        </button>
+        <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+          <button
+            onClick={() => setActiveModule('noise')}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow"
+            type="button"
+          >
+            Live
+          </button>
           <button
             onClick={() => setActiveModule('futureNoisePrediction')}
-           className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow"
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow"
           >
             Predict 5-Day Noise
           </button>
-          </div>
+        </div>
       </div>
 
+      {/* Inputs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
         <div>
           <label className="block mb-1 font-medium">Wind Speed (m/s)</label>
@@ -106,115 +107,96 @@ const PredictionPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Error */}
       {error && (
         <div className="text-red-400 mb-4">⚠️ {error}</div>
       )}
 
+      {/* Predict Button */}
       <button
         onClick={handlePredict}
-        className={`px-6 py-2 rounded font-semibold transition ${
-          loading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
+        className={`px-6 py-2 rounded font-semibold flex items-center justify-center transition ${
+          loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
         }`}
         disabled={loading}
       >
-        {loading ? "Predicting..." : "Predict"}
+        {loading ? (
+          <>
+            <Loader2 className="animate-spin mr-2" size={20} />
+            Predicting...
+          </>
+        ) : (
+          "Predict"
+        )}
       </button>
 
-      {prediction && (
-  <>
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4">Prediction Results</h2>
+      {/* Result Area */}
+      <div className="mt-8 min-h-[300px] flex items-center justify-center relative">
+        {loading && (
+          <div className="flex flex-col items-center">
+            <Loader2 className="animate-spin text-white mb-2" size={50} />
+            <p className="text-white font-semibold">Predicting...</p>
+          </div>
+        )}
 
-      {/* Card-style grid */}
-     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-  {/* Noise Level */}
-  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
-    <Volume2 className="mb-2 text-blue-400" size={28} />
-    <p className="text-gray-400">Noise Level</p>
-    <h2 className="text-white font-bold">
-      {prediction.noise_level !== undefined
-        ? prediction.noise_level.toFixed(2)
-        : "N/A"}{" "}
-      dB
-    </h2>
-  </div>
+        {!loading && prediction && (
+          <div className="w-full">
+            {/* Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+              <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+                <Volume2 className="mb-2 text-blue-400" size={28} />
+                <p className="text-gray-400">Noise Level</p>
+                <h2 className="text-white font-bold">{prediction.noise_level?.toFixed(2)} dB</h2>
+              </div>
 
-  
+              <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+                <Zap className="mb-2 text-purple-400" size={28} />
+                <p className="text-gray-400">Power Output</p>
+                <h2 className="text-white font-bold">{prediction.power_out?.toFixed(2)} kW</h2>
+              </div>
 
-  {/* Power Output */}
-  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
-    <Zap className="mb-2 text-purple-400" size={28} />
-    <p className="text-gray-400">Power Output</p>
-    <h2 className="text-white font-bold">
-      {prediction.power_out !== undefined
-        ? prediction.power_out.toFixed(2)
-        : "N/A"}{" "}
-      kW
-    </h2>
-  </div>
+              <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+                <Gauge className="mb-2 text-red-400" size={28} />
+                <p className="text-gray-400">Rotor Speed</p>
+                <h2 className="text-white font-bold">{prediction.rotor_speed?.toFixed(2)} RPM</h2>
+              </div>
 
-  {/* Rotor Speed */}
-  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
-    <Gauge className="mb-2 text-red-400" size={28} />
-    <p className="text-gray-400">Rotor Speed</p>
-    <h2 className="text-white font-bold">
-      {prediction.rotor_speed !== undefined
-        ? prediction.rotor_speed.toFixed(2)
-        : "N/A"}{" "}
-      RPM
-    </h2>
-  </div>
+              <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
+                <Move className="mb-2 text-pink-400" size={28} />
+                <p className="text-gray-400">Pitch Angle</p>
+                <h2 className="text-white font-bold">{prediction.pitch_angle?.toFixed(2)}°</h2>
+              </div>
+            </div>
 
-  {/* Pitch Angle */}
-  <div className="bg-gray-800 p-4 rounded text-center flex flex-col items-center">
-    <Move className="mb-2 text-pink-400" size={28} />
-    <p className="text-gray-400">Pitch Angle</p>
-    <h2 className="text-white font-bold">
-      {prediction.pitch_angle !== undefined
-        ? prediction.pitch_angle.toFixed(2)
-        : "N/A"}{" "}
-      °
-    </h2>
-  </div>
-</div>
-    </div>
+            {/* Turbine Canvas */}
+            <div className="mt-8 h-[500px] border rounded bg-gray-900 relative">
+              <Canvas camera={{ position: [0, 20, 50], fov: 45 }}>
+                <color attach="background" args={["lightblue"]} />
+                <Sky sunPosition={[100, 20, 10]} />
+                <ambientLight intensity={0.5} />
+                <directionalLight position={[5, 5, 5]} />
+                <TurbineModel
+                  rpm={prediction.rotor_speed}
+                  pitch={prediction.pitch_angle}
+                  windDirection={parseFloat(windDirection)}
+                  windSpeed={parseFloat(windSpeed)}
+                  position={[0, -5, 0]}
+                  scale={[0.5, 0.5, 0.5]}
+                />
+                <OrbitControls />
+              </Canvas>
 
-    {/* Turbine canvas */}
- {/* Turbine canvas container */}
-<div className="mt-8 h-[500px] border rounded bg-gray-900 relative"> {/* <-- make relative */}
-  <Canvas camera={{ position: [0, 20, 50], fov: 45 }}>
-    <color attach="background" args={["lightblue"]} />
-             <Sky sunPosition={[100, 20, 10]} />
-             <ambientLight intensity={0.5} />
-             <directionalLight position={[5, 5, 5]} />
-    <TurbineModel
-      rpm={prediction.rotor_speed}
-      pitch={prediction.pitch_angle}
-      windDirection={parseFloat(windDirection)}
-      windSpeed={parseFloat(windSpeed)}
-      position={[0, -5, 0]}
-      scale={[0.5, 0.5, 0.5]}
-    />
-    <OrbitControls />
-  </Canvas>
-
-  {/* BladePitchVisualizer overlay */}
-  {prediction && (
-    <div className="absolute top-4 right-4 z-50">
-      <BladePitchVisualizer
-        pitch={prediction.pitch_angle}
-        style={{
-          width: '150px', // or whatever size you want
-          height: '150px',
-        }}
-      />
-    </div>
-  )}
-</div>
-
-  </>
-)}
-
+              {/* BladePitchVisualizer overlay */}
+              <div className="absolute top-4 right-4 z-50">
+                <BladePitchVisualizer
+                  pitch={prediction.pitch_angle}
+                  style={{ width: '150px', height: '150px' }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
