@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect,Query
 from pydantic import BaseModel
 import asyncio
 from noise.simulator.websocket_manager import WebSocketManager
@@ -6,6 +6,7 @@ from noise.predict.prediction import predict_optimal_pitch_xgb
 from noise.weatherAPI.weatherPrediction import fetch_5day_forecast
 from noise.weatherAPI.weatherPredictionFuture import predict_future_weather 
 from noise.predict_V2.predict_V2 import recommend_pitch_with_noise
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -51,3 +52,21 @@ def predict_future(lat: float, lon: float, target_noise: float = 35.0):
     """
     predictions = predict_future_weather(lat, lon, target_noise_level=target_noise)
     return predictions
+
+
+
+
+@router.get("/forecast")
+def get_forecast(
+    lat: float = Query(9.0503, description="Latitude for the forecast"),   # default latitude
+    lon: float = Query(79.7869, description="Longitude for the forecast")  # default longitude
+):
+    """
+    Returns 5-day weather forecast for given latitude and longitude.
+    Defaults to lat=9.0503, lon=79.7869.
+    """
+    try:
+        forecast = fetch_5day_forecast(lat, lon)
+        return JSONResponse(content={"forecast_5days": forecast})
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)

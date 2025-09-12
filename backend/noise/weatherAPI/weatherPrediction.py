@@ -13,9 +13,14 @@ def fetch_5day_forecast(lat, lon):
     forecasts = []
     for entry in data['list']:  # loop through all 40 entries
         forecasts.append({
-            "timestamp": entry['dt'],
+              "timestamp": entry['dt'],
             "wind_speed": entry['wind']['speed'],
-            "wind_direction": entry['wind']['deg']
+            "wind_direction": entry['wind']['deg'],
+            "temperature": entry['main']['temp'],           # temperature in °C
+            "pressure": entry['main']['pressure'],         # hPa
+            "humidity": entry['main']['humidity'],         # %
+            "cloudiness": entry['clouds']['all'],          # %
+            "precipitation": entry.get('rain', {}).get('3h', 0)  # rain in mm for last 3h
         })
     
     return forecasts
