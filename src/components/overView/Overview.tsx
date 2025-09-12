@@ -2,28 +2,19 @@ import React, { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Sky } from "@react-three/drei";
 import TurbineModel from "../Turbine3DModelV2/WindTurbine";
-import { Volume2, Wind, Zap, Gauge, Cloud, Droplet, Thermometer  } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { Volume2, Wind, Zap, Gauge, Cloud, Droplet, Thermometer } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+
+import { useNoiseStore } from "../../store/noiseStore";
 
 const OverviewWS: React.FC = () => {
-  const [latest, setLatest] = useState<any>({
-    noise_level: 0,
-    power_out: 0,
-    rotor_speed: 0,
-    wind_speed: 0,
-    pitch_angle: 0,
-    wind_direction: 0,
-  });
-  const [history, setHistory] = useState<any[]>([]);
-  const [weather, setWeather] = useState<any>({
+  // Zustand store
+  const latest = useNoiseStore((state) => state.latest);
+  const history = useNoiseStore((state) => state.history);
+  const addData = useNoiseStore((state) => state.addData);
+
+  // Weather state
+  const [weather, setWeather] = useState({
     temperature: 0,
     pressure: 0,
     humidity: 0,
@@ -36,25 +27,19 @@ const OverviewWS: React.FC = () => {
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8000/noise/ws/stream");
 
-    ws.onopen = () => {
-      console.log("✅ WebSocket connected.");
-      setWsConnected(true);
-    };
+    ws.onopen = () => setWsConnected(true);
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        setLatest(data);
-        setHistory((prev) => [...prev, { ...data, timestamp: Date.now() }]);
+        // Add local timestamp for chart
+        addData({ ...data, timestamp: Date.now() });
       } catch (err) {
         console.error("Error parsing WS message:", err);
       }
     };
 
-    ws.onclose = () => {
-      console.log("WebSocket disconnected.");
-      setWsConnected(false);
-    };
+    ws.onclose = () => setWsConnected(false);
 
     ws.onerror = (err) => {
       console.error("WebSocket error:", err);
@@ -62,7 +47,7 @@ const OverviewWS: React.FC = () => {
     };
 
     return () => ws.close();
-  }, []);
+  }, [addData]);
 
   // Fetch current weather
   useEffect(() => {
@@ -71,7 +56,7 @@ const OverviewWS: React.FC = () => {
         const res = await fetch("http://localhost:8000/noise/forecast");
         const data = await res.json();
         if (data.forecast_5days && data.forecast_5days.length > 0) {
-          setWeather(data.forecast_5days[0]); // Get current data only
+          setWeather(data.forecast_5days[0]);
         }
       } catch (err) {
         console.error("Error fetching weather:", err);
@@ -80,18 +65,18 @@ const OverviewWS: React.FC = () => {
     fetchWeather();
   }, []);
 
-  // KPI cards data
+  // KPI cards
   const kpis = [
-    { id: "noise", label: "Noise Level", value: latest.noise_level, unit: "dB", icon: Volume2 },
-    { id: "power", label: "Power Output", value: latest.power_out, unit: "kW", icon: Zap },
-    { id: "rotor", label: "Rotor Speed", value: latest.rotor_speed, unit: "RPM", icon: Gauge },
-    { id: "wind", label: "Wind Speed", value: latest.wind_speed, unit: "m/s", icon: Wind },
+    { id: "noise", label: "Noise Level", value: latest?.noise_level ?? 0, unit: "dB", icon: Volume2 },
+    { id: "power", label: "Power Output", value: latest?.power_out ?? 0, unit: "kW", icon: Zap },
+    { id: "rotor", label: "Rotor Speed", value: latest?.rotor_speed ?? 0, unit: "RPM", icon: Gauge },
+    { id: "wind", label: "Wind Speed", value: latest?.wind_speed ?? 0, unit: "m/s", icon: Wind },
   ];
 
-  // Weather cards data
+  // Weather cards
   const weatherMetrics = [
     { id: "temperature", label: "Temperature", value: weather.temperature, unit: "°C", icon: Thermometer },
-    { id: "pressure", label: "Pressure", value: weather.pressure, unit: "hPa", icon:  Gauge   },
+    { id: "pressure", label: "Pressure", value: weather.pressure, unit: "hPa", icon: Gauge },
     { id: "humidity", label: "Humidity", value: weather.humidity, unit: "%", icon: Droplet },
     { id: "cloudiness", label: "Cloudiness", value: weather.cloudiness, unit: "%", icon: Cloud },
     { id: "precipitation", label: "Precipitation", value: weather.precipitation, unit: "mm", icon: Zap },
@@ -100,9 +85,7 @@ const OverviewWS: React.FC = () => {
   return (
     <div className="p-6 bg-black text-white min-h-screen space-y-6">
       <h2 className="text-2xl font-bold">System Overview</h2>
-      <p className="text-slate-400">
-        {wsConnected ? "Real-time monitoring" : "Connecting to WebSocket..."}
-      </p>
+      <p className="text-slate-400">{wsConnected ? "Real-time monitoring" : "Connecting to WebSocket..."}</p>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -115,17 +98,14 @@ const OverviewWS: React.FC = () => {
               <p className="text-gray-400">{kpi.label}</p>
               <h2 className="text-white font-bold">{kpi.value} {kpi.unit}</h2>
               <div className="w-full bg-gray-700 h-2 rounded-full mt-2">
-                <div
-                  className="h-2 rounded-full bg-green-400 transition-all duration-500"
-                  style={{ width: `${percentage}%` }}
-                ></div>
+                <div className="h-2 rounded-full bg-green-400 transition-all duration-500" style={{ width: `${percentage}%` }} />
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Current Weather */}
+      {/* Weather Cards */}
       <h3 className="text-xl font-semibold mt-6">Current Weather</h3>
       <div className="bg-gray-900 p-4 rounded shadow-lg grid grid-cols-2 md:grid-cols-5 gap-4 mt-2">
         {weatherMetrics.map((w) => {
@@ -142,7 +122,6 @@ const OverviewWS: React.FC = () => {
 
       {/* 3D Model + Power Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        {/* 3D Turbine Model */}
         <div className="h-[450px] border rounded bg-gray-900 p-2">
           <Canvas camera={{ position: [30, 10, 38], fov: 50 }}>
             <color attach="background" args={["lightblue"]} />
@@ -150,9 +129,9 @@ const OverviewWS: React.FC = () => {
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 5, 5]} />
             <TurbineModel
-              rpm={latest.rotor_speed || 0}
-              pitch={latest.pitch_angle || 0}
-              windDirection={latest.wind_direction || 0}
+              rpm={latest?.rotor_speed ?? 0}
+              pitch={latest?.pitch_angle ?? 0}
+              windDirection={latest?.wind_direction ?? 0}
               position={[0, -2, 0]}
               scale={[0.3, 0.3, 0.3]}
             />
@@ -160,7 +139,6 @@ const OverviewWS: React.FC = () => {
           </Canvas>
         </div>
 
-        {/* Power Output Chart */}
         <div className="h-[450px] bg-gray-900 p-4 rounded shadow-lg">
           <h3 className="text-white mb-2 font-semibold">Power Output Over Time</h3>
           <ResponsiveContainer width="100%" height="90%">
@@ -169,10 +147,9 @@ const OverviewWS: React.FC = () => {
               <XAxis
                 dataKey="timestamp"
                 stroke="#8884d8"
-                tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return `${date.getHours()}:${date.getMinutes()}`;
-                }}
+                tickFormatter={(value) =>
+                  new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                }
               />
               <YAxis stroke="#8884d8" unit="kW" />
               <Tooltip
@@ -187,15 +164,7 @@ const OverviewWS: React.FC = () => {
                   <stop offset="100%" stopColor="#10B981" stopOpacity={0.2} />
                 </linearGradient>
               </defs>
-              <Line
-                type="monotone"
-                dataKey="power_out"
-                stroke="url(#powerGradient)"
-                strokeWidth={3}
-                dot={false}
-                activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
-                isAnimationActive={true}
-              />
+              <Line type="monotone" dataKey="power_out" stroke="url(#powerGradient)" strokeWidth={3} dot={false} activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
