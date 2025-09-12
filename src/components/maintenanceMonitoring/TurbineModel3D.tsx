@@ -6,9 +6,14 @@ import WindTurbine from '../WTModelMaintenance/WindTurbine';
 interface TurbineModel3DProps {
   isModal?: boolean;
   hideLabels?: boolean;
+  generatorColor?: string;
+  gearboxColor?: string;
+  controllerColor?: string;
+  powerElectronicsColor?: string;
+  coolerColor?: string;
 }
 
-const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false, hideLabels = false }) => {
+const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false, hideLabels = false, generatorColor, gearboxColor, controllerColor, powerElectronicsColor, coolerColor }) => {
   if (isModal) {
     // Modal version - fills entire container
     return (
@@ -41,7 +46,7 @@ const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false, hideLa
             <Environment preset="sunset" />
             
             {/* Wind Turbine Model */}
-            <WindTurbine rpm={12} pitch={Math.PI / 7} hideLabels={false} />
+            <WindTurbine rpm={12} pitch={Math.PI / 7} hideLabels={false} generatorColor={generatorColor} gearboxColor={gearboxColor} controllerColor={controllerColor} powerElectronicsColor={powerElectronicsColor} coolerColor={coolerColor} />
             
             {/* Controls */}
             <OrbitControls 
@@ -100,7 +105,7 @@ const TurbineModel3D: React.FC<TurbineModel3DProps> = ({ isModal = false, hideLa
             <Environment preset="sunset" />
             
             {/* Wind Turbine Model */}
-            <WindTurbine rpm={12} pitch={Math.PI / 7} hideLabels={hideLabels} />
+            <WindTurbine rpm={12} pitch={Math.PI / 7} hideLabels={hideLabels} generatorColor={generatorColor} gearboxColor={gearboxColor} controllerColor={controllerColor} powerElectronicsColor={powerElectronicsColor} coolerColor={coolerColor} />
             
             {/* Controls */}
             <OrbitControls 

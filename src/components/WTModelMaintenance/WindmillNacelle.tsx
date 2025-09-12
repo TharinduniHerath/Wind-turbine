@@ -11,6 +11,11 @@ interface WindmillNacelleProps {
   showInternals?: boolean;
   position?: [number, number, number];
   hideLabels?: boolean;
+  generatorColor?: string;
+  gearboxColor?: string;
+  controllerColor?: string;
+  powerElectronicsColor?: string;
+  coolerColor?: string;
 }
 
 interface HoveredPart {
@@ -23,7 +28,12 @@ export default function WindmillNacelle({
   windDirection = 190, 
   showInternals = true, 
   position = [0, 0, 0],
-  hideLabels = false
+  hideLabels = false,
+  generatorColor,
+  gearboxColor,
+  controllerColor,
+  powerElectronicsColor,
+  coolerColor
 }: WindmillNacelleProps) {
   const shaftRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
@@ -150,7 +160,7 @@ export default function WindmillNacelle({
         onPointerOut={() => setHoveredPart(null)}
       >
         <boxGeometry args={[0.4, 0.4, 0.6]} />
-        <meshStandardMaterial color="#ff6666" />
+        <meshStandardMaterial color={gearboxColor || "#D3D3D3"} />
       </mesh>
 
       {/* Generator */}
@@ -164,7 +174,7 @@ export default function WindmillNacelle({
         onPointerOut={() => setHoveredPart(null)}
       >
         <cylinderGeometry args={[0.3, 0.3, 0.5, 32]} />
-        <meshStandardMaterial color="#0066cc" />
+        <meshStandardMaterial color={generatorColor || "#D3D3D3"} />
       </mesh>
 
       {/* Bearings */}
@@ -190,7 +200,7 @@ export default function WindmillNacelle({
         onPointerOut={() => setHoveredPart(null)}
       >
         <boxGeometry args={[0.8, 0.8, 0.1]} />
-        <meshStandardMaterial color="#00cc99" />
+        <meshStandardMaterial color={coolerColor || "#D3D3D3"} />
       </mesh>
 
       {/* Controller */}
@@ -203,7 +213,7 @@ export default function WindmillNacelle({
         onPointerOut={() => setHoveredPart(null)}
       >
         <boxGeometry args={[0.1, 0.3, 0.5]} />
-        <meshStandardMaterial color="#ffaa00" />
+        <meshStandardMaterial color={controllerColor || "#D3D3D3"} />
       </mesh>
 
       {/* Power Electronics */}
@@ -216,7 +226,7 @@ export default function WindmillNacelle({
         onPointerOut={() => setHoveredPart(null)}
       >
         <boxGeometry args={[0.1, 0.3, 0.5]} />
-        <meshStandardMaterial color="#E65100" />
+        <meshStandardMaterial color={powerElectronicsColor || "#D3D3D3"} />
       </mesh>
 
       {/* Danger Light */}
@@ -459,7 +469,7 @@ export default function WindmillNacelle({
           style={{
             color: "white",
             fontWeight: "bold",
-            background: "rgba(0,204,153,0.8)",
+            background: "rgba(211,211,211,0.9)",
             padding: "3px 8px",
             borderRadius: "6px",
             fontSize: "11px",

@@ -7,9 +7,14 @@ interface WindTurbineProps {
   rpm?: number;
   pitch?: number;
   hideLabels?: boolean;
+  generatorColor?: string;
+  gearboxColor?: string;
+  controllerColor?: string;
+  powerElectronicsColor?: string;
+  coolerColor?: string;
 }
 
-export default function WindTurbine({ rpm = 10, pitch = Math.PI / 8, hideLabels = false }: WindTurbineProps) {
+export default function WindTurbine({ rpm = 10, pitch = Math.PI / 8, hideLabels = false, generatorColor, gearboxColor, controllerColor, powerElectronicsColor, coolerColor }: WindTurbineProps) {
   return (
     <group>
       {/* Tower positioned at origin */}
@@ -26,7 +31,7 @@ export default function WindTurbine({ rpm = 10, pitch = Math.PI / 8, hideLabels 
         hideLabels={hideLabels}
       />
 
-     <WindmillNacelle position={[0, 12.5, -0.5]} rpm={rpm} showInternals={true} hideLabels={hideLabels} />
+     <WindmillNacelle position={[0, 12.5, -0.5]} rpm={rpm} showInternals={true} hideLabels={hideLabels} generatorColor={generatorColor} gearboxColor={gearboxColor} controllerColor={controllerColor} powerElectronicsColor={powerElectronicsColor} coolerColor={coolerColor} />
 
     </group>
   );

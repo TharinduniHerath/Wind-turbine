@@ -1084,7 +1084,47 @@ const Maintenance: React.FC = () => {
                   className="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
                   title="Click to expand 3D model"
                 >
-                  <TurbineModel3D hideLabels={show3DModal} />
+                  <TurbineModel3D hideLabels={show3DModal} generatorColor={
+                    healthScores && healthScores['Generator']
+                      ? (healthScores['Generator'].score >= 81
+                          ? '#22c55e' // green-500
+                          : healthScores['Generator'].score >= 70
+                            ? '#f59e0b' // amber-500
+                            : '#ef4444') // red-500
+                      : undefined
+                  } gearboxColor={
+                    healthScores && healthScores['Gearbox']
+                      ? (healthScores['Gearbox'].score >= 81
+                          ? '#22c55e'
+                          : healthScores['Gearbox'].score >= 70
+                            ? '#f59e0b'
+                            : '#ef4444')
+                      : undefined
+                  } controllerColor={
+                    healthScores && healthScores['Control System']
+                      ? (healthScores['Control System'].score >= 81
+                          ? '#22c55e'
+                          : healthScores['Control System'].score >= 70
+                            ? '#f59e0b'
+                            : '#ef4444')
+                      : undefined
+                  } powerElectronicsColor={
+                    healthScores && healthScores['Power Electronics']
+                      ? (healthScores['Power Electronics'].score >= 81
+                          ? '#22c55e'
+                          : healthScores['Power Electronics'].score >= 70
+                            ? '#f59e0b'
+                            : '#ef4444')
+                      : undefined
+                  } coolerColor={
+                    healthScores && healthScores['Blade System']
+                      ? (healthScores['Blade System'].score >= 81
+                          ? '#22c55e'
+                          : healthScores['Blade System'].score >= 70
+                            ? '#f59e0b'
+                            : '#ef4444')
+                      : undefined
+                  } />
                 </div>
               </div>
             </div>
@@ -1567,7 +1607,54 @@ const Maintenance: React.FC = () => {
                 
                 {/* Large 3D Model - Centered */}
                 <div className="w-full h-full">
-                  <TurbineModel3D isModal={true} />
+                  <TurbineModel3D 
+                    isModal={true} 
+                    generatorColor={
+                      healthScores && healthScores['Generator']
+                        ? (healthScores['Generator'].score >= 81
+                            ? '#22c55e' // green-500
+                            : healthScores['Generator'].score >= 70
+                              ? '#f59e0b' // amber-500
+                              : '#ef4444') // red-500
+                        : undefined
+                    } 
+                    gearboxColor={
+                      healthScores && healthScores['Gearbox']
+                        ? (healthScores['Gearbox'].score >= 81
+                            ? '#22c55e'
+                            : healthScores['Gearbox'].score >= 70
+                              ? '#f59e0b'
+                              : '#ef4444')
+                        : undefined
+                    } 
+                    controllerColor={
+                      healthScores && healthScores['Control System']
+                        ? (healthScores['Control System'].score >= 81
+                            ? '#22c55e'
+                            : healthScores['Control System'].score >= 70
+                              ? '#f59e0b'
+                              : '#ef4444')
+                        : undefined
+                    } 
+                    powerElectronicsColor={
+                      healthScores && healthScores['Power Electronics']
+                        ? (healthScores['Power Electronics'].score >= 81
+                            ? '#22c55e'
+                            : healthScores['Power Electronics'].score >= 70
+                              ? '#f59e0b'
+                              : '#ef4444')
+                        : undefined
+                    } 
+                    coolerColor={
+                      healthScores && healthScores['Blade System']
+                        ? (healthScores['Blade System'].score >= 81
+                            ? '#22c55e'
+                            : healthScores['Blade System'].score >= 70
+                              ? '#f59e0b'
+                              : '#ef4444')
+                        : undefined
+                    } 
+                  />
                 </div>
               </div>
               
