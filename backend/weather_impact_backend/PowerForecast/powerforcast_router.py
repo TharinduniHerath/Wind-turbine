@@ -21,6 +21,7 @@ router = APIRouter()
 # Global variables (same as your original)
 model_package = None
 data = None
+scada_data = {}  # Add this line
 auto_update_enabled = False
 auto_update_thread = None
 
@@ -149,15 +150,15 @@ def fallback_prediction(weather_conditions):
         return 1200.0
 
 def load_model_and_data():
-    """Load trained model and 2024 demo data"""
-    global model_package, data
+    """Load trained model, 2024 demo data, and SCADA data"""
+    global model_package, data, scada_data
     
     logger.info("Loading Real-Time Turbine API components...")
     
     # Load model
     model_files = [
-    'weather_impact_backend/PowerForecast/optimized_wind_turbine_model.pkl',
-    'weather_impact_backend/PowerForecast/wind_turbine_model.pkl'
+        'weather_impact_backend/PowerForecast/optimized_wind_turbine_model.pkl',
+        'weather_impact_backend/PowerForecast/wind_turbine_model.pkl'
     ]
     
     model_loaded = False
@@ -176,7 +177,7 @@ def load_model_and_data():
         logger.warning("No model file found")
         return False
     
-    # Load data
+    # Load weather/power data
     data_files = ['weather_impact_backend/PowerForecast/model_ready_2024_data.csv']
     
     data_loaded = False
@@ -198,8 +199,42 @@ def load_model_and_data():
         logger.warning("No data file found")
         return False
     
-    logger.info("Real-Time Turbine API ready for 2024 simulation")
+    # Load SCADA data files
+    scada_files = {
+        'nacelle_position': 'weather_impact_backend/PowerForecast/Nacelle position 2024.xlsx',
+        'pitch_angle': 'weather_impact_backend/PowerForecast/Pitch angle 2024.xlsx',
+        'rotor_rpm': 'weather_impact_backend/PowerForecast/2024_RotorSpeed.xlsx'
+    }
+    
+    scada_data = {}
+    scada_loaded_count = 0
+    
+    for data_type, file_path in scada_files.items():
+        try:
+            if os.path.exists(file_path):
+                df = pd.read_excel(file_path)
+                if 'PCTimeStamp' in df.columns:
+                    df['PCTimeStamp'] = pd.to_datetime(df['PCTimeStamp'])
+                    df = df.sort_values('PCTimeStamp').reset_index(drop=True)
+                    scada_data[data_type] = df
+                    logger.info(f"SCADA {data_type} data loaded: {len(df)} records from {file_path}")
+                    scada_loaded_count += 1
+                else:
+                    logger.error(f"PCTimeStamp column not found in {file_path}")
+            else:
+                logger.warning(f"SCADA file not found: {file_path}")
+        except Exception as e:
+            logger.error(f"Failed to load SCADA {data_type} data from {file_path}: {e}")
+    
+    if scada_loaded_count == 0:
+        logger.warning("No SCADA data files loaded successfully")
+    else:
+        logger.info(f"SCADA data loading complete: {scada_loaded_count}/{len(scada_files)} files loaded")
+    
+    logger.info("Real-Time Turbine API ready for 2024 simulation with SCADA integration")
     return True
+
+
 
 def get_simulated_2024_time():
     """Convert current real time to simulated 2024 time"""
@@ -330,6 +365,48 @@ def analyze_weather_impact(weather_data):
     
     return analysis
 
+def get_scada_data_for_timestamp(target_timestamp):
+    """Find closest 10-minute SCADA reading to target timestamp"""
+    global scada_data
+    
+    result = {}
+    
+    for turbine_id in ['WTG01', 'WTG02', 'WTG03', 'WTG04', 'WTG05', 'WTG06', 'WTG07', 'WTG08', 'WTG09', 'WTG10']:
+        result[turbine_id] = {
+            'nacelle_position': 0.0,
+            'pitch_angle': 0.0,
+            'rotor_rpm': 0.0
+        }
+        
+        # Extract turbine number for column matching
+        turbine_num = turbine_id.replace('WTG', '').lstrip('0')
+        
+        # For each SCADA data type, find closest timestamp and extract value
+        for data_type, df in scada_data.items():
+            if df is not None and len(df) > 0:
+                time_diffs = abs(df['PCTimeStamp'] - target_timestamp)
+                closest_idx = time_diffs.idxmin()
+                
+                # More specific column matching based on your Excel structure
+                if data_type == 'nacelle_position':
+                    col_name = f"{turbine_id}_Avg. direction ({turbine_num})"
+                elif data_type == 'pitch_angle':
+                    col_name = f"{turbine_id}_Blades PitchAngle Avg. ({turbine_num})"
+                elif data_type == 'rotor_rpm':
+                    col_name = f"{turbine_id}_Rotor RPM Avg. ({turbine_num})"
+                
+                if col_name in df.columns:
+                    value = df.loc[closest_idx, col_name]
+                    if pd.notna(value):
+                        if data_type == 'nacelle_position':
+                            result[turbine_id]['nacelle_position'] = float(value)
+                        elif data_type == 'pitch_angle':
+                            result[turbine_id]['pitch_angle'] = float(value)
+                        elif data_type == 'rotor_rpm':
+                            result[turbine_id]['rotor_rpm'] = float(value)
+    
+    return result
+
 def auto_update_worker():
     """Background worker for hourly auto-updates"""
     global auto_update_enabled
@@ -412,6 +489,7 @@ async def real_time_turbines():
         if not last_hour_data or not current_hour_data or not next_hour_data:
             raise HTTPException(status_code=500, detail='No historical data available for required time periods')
         
+        current_scada = get_scada_data_for_timestamp(simulated_now)
         turbines = []
         
         for turbine_id in sorted(['WTG01', 'WTG02', 'WTG03', 'WTG04', 'WTG05', 'WTG06', 'WTG07', 'WTG08', 'WTG09', 'WTG10']):
@@ -433,6 +511,14 @@ async def real_time_turbines():
             # Performance metrics
             performance_gap = actual_power_last - predicted_power_last
             performance_ratio = actual_power_last / predicted_power_last if predicted_power_last > 0 else 0
+
+            # Get SCADA data for this turbine (direct from 10-minute readings)
+            turbine_scada = current_scada.get(turbine_id, {
+                'nacelle_position': 0.0,
+                'pitch_angle': 0.0,
+                'rotor_rpm': 0.0
+            })
+            
             
             turbines.append({
                 'id': turbine_id,
@@ -450,7 +536,14 @@ async def real_time_turbines():
                 },
                 'next_hour': {
                     'forecast_power': float(round(forecast_power_next, 1))
+                },
+                'scada': {
+                    'nacelle_position': float(round(turbine_scada['nacelle_position'], 1)),
+                    'pitch_angle': float(round(turbine_scada['pitch_angle'], 2)),
+                    'rotor_rpm': float(round(turbine_scada['rotor_rpm'], 1)),
+                    'timestamp': simulated_now.strftime('%Y-%m-%d %H:%M:%S')
                 }
+
             })
         
         # Summary statistics

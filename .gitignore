@@ -36,7 +36,7 @@ venv/
 env/
 
 # ML model binaries - exclude only noise folder
-backend/noise/**/*.pkl
+*.pkl
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/

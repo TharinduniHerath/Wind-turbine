@@ -9,6 +9,7 @@ from weather_impact_backend.WindSpeed.wind_speed_router import router as wind_sp
 from weather_impact_backend.WindDirection.wind_direction_router import router as wind_direction_router
 from weather_impact_backend.Lightning.lightning_router import router as lightning_router
 from weather_impact_backend.PowerForecast.powerforcast_router import router as real_time_router       
+from weather_impact_backend.PowerForecast.multi_turbine_router import router as multi_turbine_router       
 
 
 router = APIRouter()
@@ -41,7 +42,7 @@ async def root():
         "message": "Wind Turbine ML API",
         "status": "running",
         "version": "2.0.0",
-        "modules": ["maintenance", "noise", "wind_speed", "wind_direction", "lightning", "real_time"]
+        "modules": ["maintenance", "noise", "wind_speed", "wind_direction", "lightning", "real_time", "multi_turbine"]
     }
 
 @app.get("/health")
@@ -55,7 +56,8 @@ async def overall_health():
             "wind_speed": "operational",
             "wind_direction": "operational",
             "lightning": "operational",
-            "real_time": "operational"
+            "real_time": "operational",
+            "multi_turbine": "operational"
         },
         "total_apis": 6,
         "version": "2.0.0"
@@ -82,6 +84,8 @@ app.include_router(lightning_router, prefix="/api/lightning")
 
 # Real-Time Turbine Monitoring API
 app.include_router(real_time_router, prefix="/api/real-time")
+
+app.include_router(multi_turbine_router, prefix="/api/multi-turbine")
 
 if __name__ == "__main__":
     import uvicorn

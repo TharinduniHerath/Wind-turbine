@@ -2,12 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
-import { Cloud, Wind, Thermometer, Droplets, Gauge, Eye, Download, AlertTriangle, Zap, Shield, Activity, RefreshCw } from 'lucide-react';
-
+import { Cloud, Wind, Thermometer, Droplets, Gauge, Eye, Download, AlertTriangle, Zap, Shield, Activity, RefreshCw, Send, RotateCcw, TrendingUp } from 'lucide-react';
 
 // Import your Three.js components
 import WindTurbine from './Turbine3DModelWeather/WindTurbine';
 
+
+// Add these new interfaces after line ~45
+interface WeatherInputData {
+  WS10M: number;
+  WD50M: number;
+  WS50M: number;
+  RH2M: number;
+  PRECTOTCORR: number;
+  PS: number;
+  T2M: number;
+}
+
+interface PredictionResult {
+  active_power: number;
+  pitch_angle: number;
+  nacelle_position: number;
+  rotor_speed: number;
+  status: string;
+  explanation: string;
+}
 
 interface TurbineData {
   id: string;
@@ -26,8 +45,13 @@ interface TurbineData {
   next_hour: {
     forecast_power: number;
   };
+  scada?: {
+    nacelle_position: number;
+    pitch_angle: number;
+    rotor_rpm: number;
+    timestamp: string;
+  };
 }
-
 interface PowerLossData {
   forecast: any[];
   summary: any;
@@ -110,14 +134,103 @@ interface LightningData {
 }
 
 // Three.js Scene Component
-const TurbineScene = ({ selectedTurbine, weather }: { 
-  selectedTurbine: TurbineData | null, 
-  weather: WeatherData | null 
+// const TurbineScene = ({ selectedTurbine, weather }: { 
+//   selectedTurbine: TurbineData | null, 
+//   weather: WeatherData | null 
+// }) => {
+//   // Use SCADA data if available, otherwise fall back to calculated values
+//   const scadaData = selectedTurbine?.scada;
+//   const rpm = scadaData?.rotor_rpm || Math.max((selectedTurbine?.last_hour?.actual_power || 0) / 100, 2);
+//   const pitch = scadaData?.pitch_angle ? (scadaData.pitch_angle * Math.PI / 180) : Math.PI / 8;
+//   const nacelleposition = scadaData?.nacelle_position || weather?.Wind_Direction_50m || 0;
+
+
+//    console.log('SCADA Debug:', { rpm, pitchDegrees: scadaData?.pitch_angle, nacelleposition });
+//   return (
+//     <>
+//       <PerspectiveCamera makeDefault position={[15, 10, 15]} fov={50} />
+//       <OrbitControls 
+//         enablePan={true}
+//         enableZoom={true}
+//         enableRotate={true}
+//         minDistance={10}
+//         maxDistance={50}
+//         target={[0, 6, 0]}
+//       />
+      
+//       {/* Lighting */}
+//       <ambientLight intensity={0.4} />
+//       <directionalLight 
+//         position={[10, 10, 10]} 
+//         intensity={1}
+//         castShadow
+//         shadow-mapSize-width={2048}
+//         shadow-mapSize-height={2048}
+//         shadow-camera-far={50}
+//         shadow-camera-left={-20}
+//         shadow-camera-right={20}
+//         shadow-camera-top={20}
+//         shadow-camera-bottom={-20}
+//       />
+      
+//       {/* Environment */}
+//       <Environment preset="sunset" background />
+      
+//       {/* Wind Turbine with SCADA data */}
+//       <WindTurbine
+//         rpm={rpm}
+//         pitch={pitch}
+//         nacelleposition={nacelleposition}
+//       />
+      
+//       {/* Ground plane for better visualization */}
+//       <mesh 
+//         rotation={[-Math.PI / 2, 0, 0]} 
+//         position={[0, 0, 0]}
+//         receiveShadow
+//       >
+//         <planeGeometry args={[50, 50]} />
+//         <meshStandardMaterial color="#2d5016" />
+//       </mesh>
+//     </>
+//   );
+// };
+
+// Updated TurbineScene Component
+const TurbineScene = ({ 
+  selectedTurbine, 
+  weather, 
+  prediction,
+  viewMode 
+}: { 
+  selectedTurbine: TurbineData | null;
+  weather: WeatherData | null;
+  prediction: PredictionResult | null;
+  viewMode: 'live' | 'analysis';
 }) => {
-  // Calculate turbine parameters from data
-  const rpm = selectedTurbine ? Math.max(selectedTurbine.last_hour.actual_power / 100, 0) : 5;
-  const pitch = Math.PI / 8; // Default pitch
-  const windDirection = weather?.Wind_Direction_50m || 0;
+  // Use prediction data if in analysis mode, otherwise use SCADA/live data
+  const scadaData = selectedTurbine?.scada;
+  const isAnalysisMode = viewMode === 'analysis' && prediction;
+  
+  const rpm = isAnalysisMode 
+    ? prediction?.rotor_speed || 0
+    : scadaData?.rotor_rpm || Math.max((selectedTurbine?.last_hour?.actual_power || 0) / 100, 2);
+    
+  const pitch = isAnalysisMode
+    ? (prediction?.pitch_angle * Math.PI / 180) || 0
+    : scadaData?.pitch_angle ? (scadaData.pitch_angle * Math.PI / 180) : Math.PI / 8;
+    
+  const nacelleposition = isAnalysisMode
+    ? prediction?.nacelle_position || 0
+    : scadaData?.nacelle_position || weather?.Wind_Direction_50m || 0;
+
+  console.log('TurbineScene Debug:', { 
+    viewMode, 
+    isAnalysisMode, 
+    rpm, 
+    pitchDegrees: isAnalysisMode ? prediction?.pitch_angle : scadaData?.pitch_angle, 
+    nacelleposition 
+  });
 
   return (
     <>
@@ -149,11 +262,11 @@ const TurbineScene = ({ selectedTurbine, weather }: {
       {/* Environment */}
       <Environment preset="sunset" background />
       
-      {/* Wind Turbine */}
+      {/* Wind Turbine with dynamic data */}
       <WindTurbine
         rpm={rpm}
         pitch={pitch}
-        windDirection={windDirection}
+        nacelleposition={nacelleposition}
       />
       
       {/* Ground plane for better visualization */}
@@ -213,7 +326,7 @@ const useWindDirectionData = () => {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchData, 600000);
     return () => clearInterval(interval);
   }, []);
 
@@ -356,7 +469,7 @@ const useWindSpeedData = (testMode = false) => {
 
     fetchData();
     if (!testMode) {
-      const interval = setInterval(fetchData, 30000);
+      const interval = setInterval(fetchData, 600000);
       return () => clearInterval(interval);
     }
   }, [testMode]);
@@ -364,7 +477,295 @@ const useWindSpeedData = (testMode = false) => {
   return data;
 };
 
+// Weather Input Form Component
+const WeatherInputForm = ({ 
+  selectedTurbine, 
+  onPredictionReceived, 
+  isLoading, 
+  onLoadingChange 
+}: {
+  selectedTurbine: TurbineData | null;
+  onPredictionReceived: (prediction: PredictionResult) => void;
+  isLoading: boolean;
+  onLoadingChange: (loading: boolean) => void;
+}) => {
+  const [weatherInput, setWeatherInput] = useState<WeatherInputData>({
+    WS10M: 8.5,
+    WD50M: 180.0,
+    WS50M: 10.2,
+    RH2M: 75.0,
+    PRECTOTCORR: 0.5,
+    PS: 100.8,
+    T2M: 28.5
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTurbine) return;
+
+    try {
+      onLoadingChange(true);
+      
+      const response = await fetch(`http://localhost:8000/api/multi-turbine/predict?turbine_id=${selectedTurbine.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(weatherInput), // Send weatherInput directly
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      // Check for shutdown/error conditions
+      if (result.error || result.status === 'SHUTDOWN') {
+        // Show error message to user
+        alert(`${result.status}: ${result.explanation}`);
+        // Still pass the result to show shutdown state
+        onPredictionReceived(result.predictions);
+      } else {
+        // Normal prediction
+        onPredictionReceived(result.predictions);
+      }
+      
+    } catch (error) {
+      console.error('Prediction error:', error);
+    } finally {
+      onLoadingChange(false);
+    }
+  };
+
+  const resetForm = () => {
+    setWeatherInput({
+      WS10M: 8.5,
+      WD50M: 180.0,
+      WS50M: 10.2,
+      RH2M: 75.0,
+      PRECTOTCORR: 0.5,
+      PS: 100.8,
+      T2M: 28.5
+    });
+  };
+
+  return (
+    <div className="bg-slate-800/95 backdrop-blur-sm rounded-lg p-6 border border-slate-700 w-full max-w-md">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="text-white font-semibold">Weather Input</h4>
+        <button
+          onClick={resetForm}
+          className="p-1 text-slate-400 hover:text-white transition-colors"
+          title="Reset to defaults"
+        >
+          <RotateCcw className="w-4 h-4" />
+        </button>
+      </div>
+      
+      {selectedTurbine && (
+        <div className="mb-4 p-2 bg-blue-600/20 border border-blue-500/30 rounded-lg">
+          <div className="text-blue-300 text-sm">Predicting for: {selectedTurbine.id}</div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-slate-300 text-xs mb-1">Wind Speed 10m (m/s)</label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="30"
+              value={weatherInput.WS10M}
+              onChange={(e) => setWeatherInput(prev => ({ ...prev, WS10M: parseFloat(e.target.value) || 0 }))}
+              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-slate-300 text-xs mb-1">Wind Speed 50m (m/s)</label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="35"
+              value={weatherInput.WS50M}
+              onChange={(e) => setWeatherInput(prev => ({ ...prev, WS50M: parseFloat(e.target.value) || 0 }))}
+              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-slate-300 text-xs mb-1">Wind Direction (°)</label>
+            <input
+              type="number"
+              step="1"
+              min="0"
+              max="360"
+              value={weatherInput.WD50M}
+              onChange={(e) => setWeatherInput(prev => ({ ...prev, WD50M: parseFloat(e.target.value) || 0 }))}
+              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-slate-300 text-xs mb-1">Temperature (°C)</label>
+            <input
+              type="number"
+              step="0.1"
+              min="15"
+              max="45"
+              value={weatherInput.T2M}
+              onChange={(e) => setWeatherInput(prev => ({ ...prev, T2M: parseFloat(e.target.value) || 0 }))}
+              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-slate-300 text-xs mb-1">Humidity (%)</label>
+            <input
+              type="number"
+              step="1"
+              min="30"
+              max="100"
+              value={weatherInput.RH2M}
+              onChange={(e) => setWeatherInput(prev => ({ ...prev, RH2M: parseFloat(e.target.value) || 0 }))}
+              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-slate-300 text-xs mb-1">Pressure (hPa)</label>
+            <input
+              type="number"
+              step="0.1"
+              min="95"
+              max="105"
+              value={weatherInput.PS}
+              onChange={(e) => setWeatherInput(prev => ({ ...prev, PS: parseFloat(e.target.value) || 0 }))}
+              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-slate-300 text-xs mb-1">Precipitation (mm/h)</label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="50"
+              value={weatherInput.PRECTOTCORR}
+              onChange={(e) => setWeatherInput(prev => ({ ...prev, PRECTOTCORR: parseFloat(e.target.value) || 0 }))}
+              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading || !selectedTurbine}
+          className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+        >
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>Predicting...</span>
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4" />
+              <span>Get Prediction</span>
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+
+// Prediction Results Component
+const PredictionResults = ({ 
+  prediction, 
+  selectedTurbine 
+}: { 
+  prediction: PredictionResult | null;
+  selectedTurbine: TurbineData | null;
+}) => {
+  if (!prediction || !selectedTurbine) return null;
+
+  return (
+    <div className="bg-slate-800/95 backdrop-blur-sm rounded-lg p-4 border border-slate-700 w-full max-w-md">
+      <div className="flex items-center space-x-2 mb-3">
+        <TrendingUp className="w-4 h-4 text-purple-400" />
+        <h4 className="text-white font-semibold">Predicted Performance</h4>
+      </div>
+      
+      <div className="mb-3 p-2 bg-purple-600/20 border border-purple-500/30 rounded-lg">
+        <div className="text-purple-300 text-sm">Results for: {selectedTurbine.id}</div>
+      </div>
+
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-slate-700 rounded-lg p-2">
+            <div className="text-slate-300 text-xs">Active Power</div>
+            <div className="text-white font-semibold">{prediction.active_power.toFixed(1)} kW</div>
+          </div>
+          
+          <div className="bg-slate-700 rounded-lg p-2">
+            <div className="text-slate-300 text-xs">Rotor Speed</div>
+            <div className="text-white font-semibold">{prediction.rotor_speed.toFixed(1)} RPM</div>
+          </div>
+
+          <div className="bg-slate-700 rounded-lg p-2">
+            <div className="text-slate-300 text-xs">Pitch Angle</div>
+            <div className="text-white font-semibold">{prediction.pitch_angle.toFixed(1)}°</div>
+          </div>
+
+          <div className="bg-slate-700 rounded-lg p-2">
+            <div className="text-slate-300 text-xs">Nacelle Position</div>
+            <div className="text-white font-semibold">{prediction.nacelle_position.toFixed(1)}°</div>
+          </div>
+        </div>
+
+      <div className={`p-3 rounded-lg ${
+        prediction.status === 'OPTIMAL' ? 'bg-green-400/20 border border-green-400/30' :
+        prediction.status === 'GOOD' ? 'bg-blue-400/20 border border-blue-400/30' :
+        prediction.status === 'MODERATE' ? 'bg-amber-400/20 border border-amber-400/30' :
+        prediction.status === 'LOW' ? 'bg-red-400/20 border border-red-400/30' :
+        prediction.status === 'SHUTDOWN' ? 'bg-red-600/20 border border-red-600/30' :
+        prediction.status === 'MAINTENANCE' ? 'bg-orange-400/20 border border-orange-400/30' :
+        prediction.status === 'UNKNOWN' ? 'bg-gray-400/20 border border-gray-400/30' :
+        'bg-gray-400/20 border border-gray-400/30'
+      }`}>
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-sm font-medium text-white">Status</span>
+          <span className={`text-xs px-2 py-1 rounded-full ${
+            prediction.status === 'OPTIMAL' ? 'bg-green-400/20 text-green-400' :
+            prediction.status === 'GOOD' ? 'bg-blue-400/20 text-blue-400' :
+            prediction.status === 'MODERATE' ? 'bg-amber-400/20 text-amber-400' :
+            prediction.status === 'LOW' ? 'bg-red-400/20 text-red-400' :
+            prediction.status === 'SHUTDOWN' ? 'bg-red-600/20 text-red-300' :
+            prediction.status === 'MAINTENANCE' ? 'bg-orange-400/20 text-orange-400' :
+            prediction.status === 'UNKNOWN' ? 'bg-gray-400/20 text-gray-400' :
+            'bg-gray-400/20 text-gray-400'
+          }`}>
+            {prediction.status}
+          </span>
+        </div>
+        <div className="text-slate-300 text-xs">{prediction.explanation}</div>
+      </div>
+      </div>
+    </div>
+  );
+};
+
 const WeatherImpact = () => {
+
+  const [viewMode, setViewMode] = useState<'live' | 'analysis'>('live');
+  const [prediction, setPrediction] = useState<PredictionResult | null>(null);
+  const [predictionLoading, setPredictionLoading] = useState(false);
   const [turbines, setTurbines] = useState<TurbineData[]>([]);
   const [weatherData, setWeatherData] = useState<{
     last_hour: WeatherData | null;
@@ -397,6 +798,19 @@ const WeatherImpact = () => {
   const [analysisPeriods, setAnalysisPeriods] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [testMode, setTestMode] = useState(false);
+
+  // Handler for mode switching
+  const handleModeSwitch = (newMode: 'live' | 'analysis') => {
+    setViewMode(newMode);
+    if (newMode === 'live') {
+      setPrediction(null); // Clear predictions when switching to live mode
+    }
+  };
+
+  // Handler for receiving predictions
+  const handlePredictionReceived = (newPrediction: PredictionResult) => {
+    setPrediction(newPrediction);
+  };
   
    // Add this line with your other hook declarations
 const { 
@@ -487,7 +901,7 @@ const {
   };
   
   fetchAllData();
-  const interval = setInterval(fetchAllData, 30000); // Update every 30 seconds
+  const interval = setInterval(fetchAllData, 600000); // Update every 30 seconds
   return () => clearInterval(interval);
   }, []);
 
@@ -573,13 +987,41 @@ const {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h1 className="text-2xl font-bold text-white">Wind Farm Digital Twin - Weather Impact Analysis</h1>
+
+                          {/* Mode Toggle */}
+            <div className="flex items-center space-x-1 bg-slate-700 rounded-lg p-1">
+              <button
+                onClick={() => handleModeSwitch('live')}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  viewMode === 'live'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                Live Monitoring
+              </button>
+              <button
+                onClick={() => handleModeSwitch('analysis')}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  viewMode === 'analysis'
+                    ? 'bg-purple-600 text-white'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                What-If Analysis
+              </button>
+            </div>
+              
+              
+              
+              
               <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-lg text-sm ${
                 apiConnected 
                   ? 'bg-green-400/10 border border-green-400/20 text-green-400' 
                   : 'bg-red-400/10 border border-red-400/20 text-red-400'
               }`}>
                 <div className={`w-2 h-2 rounded-full ${apiConnected ? 'bg-green-400' : 'bg-red-400'}`} />
-                {apiConnected ? 'Live Data' : 'Disconnected'}
+                {viewMode === 'live' ? (apiConnected ? 'Live Data' : 'Disconnected') : 'Analysis Mode'}
               </div>
             </div>
             
@@ -690,16 +1132,21 @@ const {
           </div>
 
           {/* Center Area - Three.js Container */}
-          <div className="flex-1 relative">
-            <Canvas
-              className="w-full h-full"
-              gl={{ antialias: true }}
-              shadows
-            >
-              <TurbineScene selectedTurbine={selectedTurbine} weather={weatherData.current_hour} />
-            </Canvas>
+            <div className="flex-1 relative">
+          <Canvas className="w-full h-full" gl={{ antialias: true }} shadows>
+            <TurbineScene 
+              selectedTurbine={selectedTurbine} 
+              weather={weatherData.current_hour}
+              prediction={prediction}
+              viewMode={viewMode}
+            />
+          </Canvas>
             
             {/* Overlay - Selected Turbine Info */}
+            
+
+            {viewMode === 'live' && (
+              <>
             {selectedTurbine && (
               <div className="absolute top-4 left-4">
                 <div className="bg-slate-800/95 backdrop-blur-sm rounded-lg p-4 border border-slate-700 min-w-[320px]">
@@ -747,6 +1194,8 @@ const {
                       </div>
                     </div>
                   </div>
+                   
+
 
                   {/* Forecast Data */}
                   <div>
@@ -765,6 +1214,10 @@ const {
                 </div>
               </div>
             )}
+
+            
+
+            
 
             {/* Farm Overview */}
             <div className="absolute top-4 right-4">
@@ -808,9 +1261,94 @@ const {
                   )}
                 </div>
               </div>
+              
             </div>
-          </div>
 
+             {/* SCADA Data Panel */}
+                    {selectedTurbine?.scada && (
+                      <div className="absolute top-4 left-96">
+                        <div className="bg-slate-800/95 backdrop-blur-sm rounded-lg p-4 border border-slate-700 min-w-[280px]">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse"></div>
+                            <h5 className="text-white font-semibold">Live SCADA Data</h5>
+                            <span className="text-xs text-slate-400">({selectedTurbine.id})</span>
+                          </div>
+                          
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-slate-300">Rotor RPM:</span>
+                              <span className="text-green-400 font-semibold">
+                                {selectedTurbine.scada.rotor_rpm?.toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-300">Nacelle Position:</span>
+                              <span className="text-blue-400 font-semibold">
+                                {selectedTurbine.scada.nacelle_position?.toFixed(1)}°
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-300">Pitch Angle:</span>
+                              <span className="text-purple-400 font-semibold">
+                                {selectedTurbine.scada.pitch_angle?.toFixed(1)}°
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-300">Actual Power:</span>
+                              <span className="text-white font-semibold">
+                                {selectedTurbine.last_hour.actual_power?.toFixed(1)} kW
+                              </span>
+                            </div>
+                            
+                            <div className="border-t border-slate-600 pt-2 mt-2">
+                               
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                </>
+            )}
+                    
+          
+          
+
+           {viewMode === 'analysis' && (
+            <>
+              {/* Weather Input Form */}
+              <div className="absolute top-4 left-4">
+                <WeatherInputForm
+                  selectedTurbine={selectedTurbine}
+                  onPredictionReceived={handlePredictionReceived}
+                  isLoading={predictionLoading}
+                  onLoadingChange={setPredictionLoading}
+                />
+              </div>
+              
+              {/* Prediction Results */}
+              {prediction && (
+                <div className="absolute top-4 left-96">
+                  <PredictionResults
+                    prediction={prediction}
+                    selectedTurbine={selectedTurbine}
+                  />
+                </div>
+              )}
+              
+              {/* Analysis Mode Status */}
+              <div className="absolute top-4 right-4">
+                <div className="bg-purple-600/20 border border-purple-500/30 rounded-lg p-3">
+                  <div className="text-purple-300 text-sm font-medium">Analysis Mode</div>
+                  <div className="text-slate-400 text-xs">
+                    {selectedTurbine ? `Analyzing ${selectedTurbine.id}` : 'Select a turbine to analyze'}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          
+        </div>
+          
           {/* Right Panel - Weather Impact Analysis */}
           <div className="w-96 bg-slate-800 border-l border-slate-700 flex flex-col overflow-y-auto">
             {/* Time Periods */}
@@ -890,9 +1428,7 @@ const {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-white">Power Loss Due to Wind Direction Change</h3>
-                  <p className="text-slate-400 text-xs">
-                    ML-powered predictions using trained XGBoost model with turbine-specific wind corrections
-                  </p>
+                   
                 </div>
                 <AlertTriangle className="w-5 h-5 text-red-400" />
               </div>
@@ -1092,8 +1628,8 @@ const {
                 <div className="mt-3 pt-3 border-t border-slate-600">
                   <div className="text-xs text-slate-400">
                     <div>Current Period: {lightningData.current_period_start}</div>
-                    <div>Last Updated: {new Date(lightningData.last_updated).toLocaleTimeString()}</div>
-                    <div>Features: {lightningData.model_info.features_calculated}</div>
+                    
+                    
                   </div>
                 </div>
               )}
@@ -1103,9 +1639,7 @@ const {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="text-lg font-semibold text-white">Wind Speed Power Loss</h3>
-                  <p className="text-slate-400 text-xs">
-                    ML-powered predictions for low wind (&lt;3 m/s) and high wind (&gt;25 m/s) scenarios
-                  </p>
+                   
                 </div>
                 <AlertTriangle className="w-5 h-5 text-amber-400" />
               </div>
