@@ -6,7 +6,7 @@ import os
 
 # --- Config ---  
 MODEL_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "models", "rf_model_physics_aware.pkl")
+    os.path.join(os.path.dirname(__file__), "..", "models", "rf_model.pkl")
 )
 
 CUT_IN = 3.0
