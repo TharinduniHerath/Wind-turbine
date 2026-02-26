@@ -1,0 +1,12 @@
+[
+  "WindSpeed_1",
+  "Power_Output_1", 
+  "Rotor_RPM_1",
+  "Gearbox_Temp_1",
+  "Generator_Temp_1",
+  "Nacelle_Temp_1",
+  "Blade_Pitch_1",
+  "Yaw_Angle_1",
+  "Voltage_L1_1",
+  "Voltage_L2_1"
+]

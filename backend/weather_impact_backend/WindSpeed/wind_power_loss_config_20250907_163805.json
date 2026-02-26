@@ -1,0 +1,40 @@
+{
+  "model_type": "xgboost",
+  "feature_columns": [
+    "Wind_Speed",
+    "Wind_Speed_Squared",
+    "Wind_Speed_Cubed",
+    "Wind_Speed_1h_Lag",
+    "Wind_Speed_3h_Mean",
+    "Wind_Speed_3h_Std",
+    "Wind_Speed_Change",
+    "Active_Power_1h_Lag",
+    "Expected_Power",
+    "Hour",
+    "DayOfWeek",
+    "Month",
+    "Season_Encoded",
+    "Turbine_ID_Encoded"
+  ],
+  "training_metrics": {
+    "r2_score": 0.986257340671868,
+    "mae": 26.58408909558344,
+    "rmse": 74.96054978824417,
+    "cv_r2_mean": 0.949062179885464,
+    "cv_r2_std": 0.02776689421914894
+  },
+  "training_timestamp": "20250907_163805",
+  "training_samples": 524260,
+  "turbines": [
+    "WTG01",
+    "WTG02",
+    "WTG03",
+    "WTG04",
+    "WTG05",
+    "WTG06",
+    "WTG07",
+    "WTG08",
+    "WTG09",
+    "WTG10"
+  ]
+}
